@@ -2,9 +2,12 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
+import GUIright_menu
 import file_handle
-from classes.Enum_transport_type import TransportType
 from file_handle import stations
+
+from classes.Enum_transport_type import TransportType
+from classes.Class_transport_object import TransportObject
 
 
 def create_window():
@@ -14,7 +17,6 @@ def create_window():
     """
 
     # Read the existing stations from the JSON file
-    globals()["station"] = file_handle.return_list_of_stations()
     station_names = [station.stationName for station in stations]
 
     # Create the main window
@@ -184,6 +186,13 @@ def create_window():
         # Add new transport entry to json file
         file_handle.add_new_transport_entry_to_json(transportType.get(), int(number.get()), name.get(), stops,
                                                     departureTimes)
+
+        # Refresh the transport paths
+        file_handle.load_city()
+        newTransportEntry = TransportObject(transportType.get(), int(number.get()), name.get(), stops, departureTimes)
+        GUIright_menu.refresh_transport_paths(newTransportEntry)
+
+        # Close the form
         form.destroy()
 
     # Create a button to add new transport entry

@@ -2,7 +2,7 @@ import json
 from typing import List
 
 from classes.Class_station import Station
-from classes.Class_tranport_object import TransportObject
+from classes.Class_transport_object import TransportObject
 from classes.Class_map_detail import MapDetail
 
 cityName = ""

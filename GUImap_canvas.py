@@ -1,5 +1,7 @@
 from tkinter import Canvas
 
+from file_handle import stations, map_details
+
 import file_handle
 
 canvas = None

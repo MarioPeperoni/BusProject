@@ -50,32 +50,6 @@
                     "7:00",
                     "8:00"
                 ]
-            },
-            {
-                "transportType": 0,
-                "number": 154,
-                "name": "Masno",
-                "stops": [
-                    {
-                        "stationName": "Dworzec G\u0142\u00f3wny",
-                        "stationID": 1,
-                        "transportType": 2,
-                        "coordinateX": 450,
-                        "coordinateY": 200
-                    },
-                    {
-                        "stationName": "Witomino",
-                        "stationID": 3,
-                        "transportType": 0,
-                        "coordinateX": 250,
-                        "coordinateY": 500
-                    }
-                ],
-                "departureTimes": [
-                    "14:44",
-                    "13:33",
-                    "15:55"
-                ]
             }
         ],
         "map_details": [

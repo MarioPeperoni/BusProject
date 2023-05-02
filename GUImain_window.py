@@ -1,7 +1,7 @@
 import tkinter as tk
 
 import GUImap_canvas
-import GUIform_create_tranport
+import GUIright_menu
 
 
 def create_main_window():
@@ -13,13 +13,12 @@ def create_main_window():
     window = tk.Tk()
     window.geometry("980x600")
     window.title("Bus Project")
-
-    # Create a button to open the CreateTransportEntry window
-    create_transport_button = tk.Button(window, text="Create Transport Entry",
-                                        command=GUIform_create_tranport.create_window)
-    create_transport_button.pack(side="right", anchor="ne", pady=20)
+    window.resizable(False, False)
 
     # Create a canvas for displaying the map
-    GUImap_canvas.create_canvas(window).pack(side="left")
+    GUImap_canvas.create_canvas(window).pack(side="left", fill="both", expand=True, pady=5)
+
+    # Create right side frame
+    GUIright_menu.create_right_menu(window).pack(side="right", pady=5, padx=10)
 
     window.mainloop()
