@@ -3,8 +3,8 @@ from tkinter import ttk
 from tkinter import messagebox
 
 import file_handle
-from Enum_transport_type import TransportType
-from file_handle import existing_stations
+from classes.Enum_transport_type import TransportType
+from file_handle import stations
 
 
 def create_window():
@@ -14,11 +14,10 @@ def create_window():
     """
 
     # Read the existing stations from the JSON file
-    globals()["existing_stations"] = file_handle.read_stations_from_json()
-    station_names = [station.stationName for station in existing_stations]
+    globals()["station"] = file_handle.return_list_of_stations()
+    station_names = [station.stationName for station in stations]
 
     # Create the main window
-    print(existing_stations)
     print(station_names)
     form = tk.Toplevel(pady=20, padx=20)
     form.title("Create new transport entry")
@@ -81,10 +80,14 @@ def create_window():
         if station == "                                        ":  # Check if any station is selected
             return
 
+        # Delete station from dropdown menu
+        availableStops_dropdown["menu"].delete(station_names.index(station))
+        station_names.remove(station)
+
         # Add station to selected stations list
         selectedStops_listbox.insert(tk.END, str(len(stops)) + " " + station)
         stops.append(station)
-        selectedStop.set("             ")
+        selectedStop.set("                                        ")
         selectedStops_listbox.update()
 
         # Change size of listbox
@@ -115,7 +118,6 @@ def create_window():
         :param entry:  entry to check
         :return:
         """
-        print(len(entry))
         if len(entry) > 5:
             return False
         else:
@@ -178,8 +180,9 @@ def create_window():
         if not number.get() or not name.get() or not stops or not departureTimes:
             messagebox.showerror("Error", "Please fill in all fields")
             return
+
         # Add new transport entry to json file
-        file_handle.add_new_transport_entry_to_json(transportType.get(), number.get(), name.get(), stops,
+        file_handle.add_new_transport_entry_to_json(transportType.get(), int(number.get()), name.get(), stops,
                                                     departureTimes)
         form.destroy()
 

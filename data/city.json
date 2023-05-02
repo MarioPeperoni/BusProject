@@ -1,0 +1,402 @@
+[
+    {
+        "cityName": "Gdynia",
+        "stations": [
+            {
+                "stationName": "Dworzec G\u0142\u00f3wny",
+                "stationID": 1,
+                "transportType": 2,
+                "coordinateX": 450,
+                "coordinateY": 200
+            },
+            {
+                "stationName": "Or\u0142owo",
+                "stationID": 2,
+                "transportType": 1,
+                "coordinateX": 150,
+                "coordinateY": 300
+            },
+            {
+                "stationName": "Witomino",
+                "stationID": 3,
+                "transportType": 0,
+                "coordinateX": 250,
+                "coordinateY": 500
+            }
+        ],
+        "transport_objects": [
+            {
+                "transportType": 0,
+                "number": 12,
+                "name": "Linia 12",
+                "stops": [
+                    {
+                        "stationName": "Dworzec G\u0142\u00f3wny",
+                        "stationID": 1,
+                        "transportType": 2,
+                        "coordinateX": 450,
+                        "coordinateY": 200
+                    },
+                    {
+                        "stationName": "Witomino",
+                        "stationID": 3,
+                        "transportType": 0,
+                        "coordinateX": 250,
+                        "coordinateY": 500
+                    }
+                ],
+                "departureTimes": [
+                    "6:00",
+                    "7:00",
+                    "8:00"
+                ]
+            },
+            {
+                "transportType": 0,
+                "number": 154,
+                "name": "Masno",
+                "stops": [
+                    {
+                        "stationName": "Dworzec G\u0142\u00f3wny",
+                        "stationID": 1,
+                        "transportType": 2,
+                        "coordinateX": 450,
+                        "coordinateY": 200
+                    },
+                    {
+                        "stationName": "Witomino",
+                        "stationID": 3,
+                        "transportType": 0,
+                        "coordinateX": 250,
+                        "coordinateY": 500
+                    }
+                ],
+                "departureTimes": [
+                    "14:44",
+                    "13:33",
+                    "15:55"
+                ]
+            }
+        ],
+        "map_details": [
+            {
+                "points": [
+                    [
+                        614,
+                        74
+                    ],
+                    [
+                        556,
+                        109
+                    ],
+                    [
+                        549,
+                        200
+                    ],
+                    [
+                        593,
+                        222
+                    ],
+                    [
+                        618,
+                        181
+                    ],
+                    [
+                        643,
+                        179
+                    ],
+                    [
+                        664,
+                        232
+                    ],
+                    [
+                        691,
+                        227
+                    ],
+                    [
+                        712,
+                        181
+                    ],
+                    [
+                        761,
+                        186
+                    ],
+                    [
+                        800,
+                        215
+                    ],
+                    [
+                        774,
+                        271
+                    ],
+                    [
+                        695,
+                        274
+                    ],
+                    [
+                        686,
+                        315
+                    ],
+                    [
+                        625,
+                        320
+                    ],
+                    [
+                        608,
+                        269
+                    ],
+                    [
+                        570,
+                        267
+                    ],
+                    [
+                        568,
+                        231
+                    ],
+                    [
+                        597,
+                        223
+                    ],
+                    [
+                        603,
+                        190
+                    ]
+                ],
+                "color": "blue"
+            },
+            {
+                "points": [
+                    [
+                        124,
+                        295
+                    ],
+                    [
+                        103,
+                        349
+                    ],
+                    [
+                        124,
+                        372
+                    ],
+                    [
+                        144,
+                        344
+                    ]
+                ],
+                "color": "red"
+            },
+            {
+                "points": [
+                    [
+                        237,
+                        309
+                    ],
+                    [
+                        292,
+                        306
+                    ],
+                    [
+                        290,
+                        356
+                    ],
+                    [
+                        234,
+                        354
+                    ]
+                ],
+                "color": "green"
+            },
+            {
+                "points": [
+                    [
+                        690,
+                        345
+                    ],
+                    [
+                        740,
+                        341
+                    ],
+                    [
+                        732,
+                        388
+                    ],
+                    [
+                        694,
+                        397
+                    ],
+                    [
+                        678,
+                        375
+                    ]
+                ],
+                "color": "orange"
+            },
+            {
+                "points": [
+                    [
+                        585,
+                        562
+                    ],
+                    [
+                        601,
+                        529
+                    ],
+                    [
+                        641,
+                        519
+                    ],
+                    [
+                        664,
+                        545
+                    ],
+                    [
+                        650,
+                        567
+                    ],
+                    [
+                        619,
+                        574
+                    ]
+                ],
+                "color": "purple"
+            },
+            {
+                "points": [
+                    [
+                        290,
+                        488
+                    ],
+                    [
+                        271,
+                        536
+                    ],
+                    [
+                        286,
+                        568
+                    ],
+                    [
+                        316,
+                        567
+                    ],
+                    [
+                        327,
+                        523
+                    ]
+                ],
+                "color": "yellow"
+            },
+            {
+                "points": [
+                    [
+                        91,
+                        503
+                    ],
+                    [
+                        113,
+                        459
+                    ],
+                    [
+                        155,
+                        472
+                    ],
+                    [
+                        145,
+                        525
+                    ]
+                ],
+                "color": "pink"
+            },
+            {
+                "points": [
+                    [
+                        389,
+                        147
+                    ],
+                    [
+                        429,
+                        153
+                    ],
+                    [
+                        448,
+                        188
+                    ],
+                    [
+                        437,
+                        226
+                    ],
+                    [
+                        395,
+                        234
+                    ],
+                    [
+                        365,
+                        212
+                    ],
+                    [
+                        358,
+                        174
+                    ]
+                ],
+                "color": "teal"
+            },
+            {
+                "points": [
+                    [
+                        729,
+                        82
+                    ],
+                    [
+                        741,
+                        118
+                    ],
+                    [
+                        772,
+                        126
+                    ],
+                    [
+                        786,
+                        102
+                    ],
+                    [
+                        772,
+                        78
+                    ],
+                    [
+                        739,
+                        74
+                    ]
+                ],
+                "color": "brown"
+            },
+            {
+                "points": [
+                    [
+                        506,
+                        242
+                    ],
+                    [
+                        556,
+                        248
+                    ],
+                    [
+                        558,
+                        280
+                    ],
+                    [
+                        525,
+                        297
+                    ],
+                    [
+                        497,
+                        281
+                    ],
+                    [
+                        499,
+                        252
+                    ]
+                ],
+                "color": "gray"
+            }
+        ]
+    }
+]

@@ -1,9 +1,14 @@
 import json
-from typing import List, Any
+from typing import List
 
-from Class_station import Station
+from classes.Class_station import Station
+from classes.Class_tranport_object import TransportObject
+from classes.Class_map_detail import MapDetail
 
-existing_stations: list[Station] = []
+cityName = ""
+stations: list[Station] = []
+transport_objects: list[TransportObject] = []
+map_details: list[MapDetail] = []
 
 
 def add_new_transport_entry_to_json(transportType, number, name, stops_names, departureTimes):
@@ -17,45 +22,78 @@ def add_new_transport_entry_to_json(transportType, number, name, stops_names, de
     :return:
     """
 
-    with open("data/transport_data.json", "r") as file:
+    with open("data/city.json", "r") as file:
         data = json.load(file)
 
-    stops = Station.get_stations_by_names(stops_names, existing_stations)
+    # Get the list of stations
+    stops = Station.get_stations_by_names(stops_names, stations)
     stops = [stop.to_dict() for stop in stops]
+
     # Create a new entry
     new_entry = {
-        "transport_type": transportType,
+        "transportType": transportType,
         "number": number,
         "name": name,
         "stops": stops,
-        "departure_times": departureTimes
+        "departureTimes": departureTimes
     }
 
     # Add the new entry to the data
-    data.append(new_entry)
+    data[0]["transport_objects"].append(new_entry)
 
     # Open the JSON file for writing
-    with open("data/transport_data.json", "w") as file:
+    with open("data/city.json", "w") as file:
         json.dump(data, file, indent=4)
 
 
-def read_stations_from_json() -> List[Station]:
+def load_city():
     """
-    Reads stations from a JSON file and returns a list of Station objects
+    Loads the city from a JSON file
     """
-    global existing_stations
-    with open('data/stations.json', 'r') as f:
-        data = json.load(f)
 
-    stations = []
-    for station_data in data:
-        station = Station()
-        station.stationName = station_data['stationName']
-        station.stationID = station_data['stationID']
-        station.transportType = station_data['transportType']
-        station.coordinateX = station_data['coordinateX']
-        station.coordinateY = station_data['coordinateY']
-        stations.append(station)
-    existing_stations = stations
-    print(existing_stations)
+    # Load the city from a JSON file
+    data = json.loads(open('data/city.json').read())
+
+    global cityName
+    global stations
+    global transport_objects
+    global map_details
+
+    # Load all variables data from the JSON file
+    cityName = data[0]['cityName']
+    stations = [Station(s['stationName'], s['stationID'], s['transportType'], s['coordinateX'], s['coordinateY']) for s
+                in data[0]['stations']]
+    transport_objects = [TransportObject(t['transportType'], t['number'], t['name'], [
+        Station(s['stationName'], s['stationID'], s['transportType'], s['coordinateX'], s['coordinateY']) for s in
+        t['stops']], t['departureTimes']) for t in data[0]['transport_objects']]
+    map_details = [MapDetail(m['points'], m['color']) for m in data[0]['map_details']]
+
+
+def return_list_of_stations() -> List[Station]:
+    """
+    Returns a list of stations
+    """
+    load_city()
+    global stations
+    print(stations)
     return stations
+
+
+def return_list_of_transport_objects() -> List[TransportObject]:
+    """
+    Returns a list of transport objects
+    """
+    load_city()
+    global transport_objects
+    print(transport_objects)
+    return transport_objects
+
+
+def return_list_of_map_details() -> List[MapDetail]:
+    """
+    Returns a list of map details
+    """
+    load_city()
+    global map_details
+    print(map_details)
+    return map_details

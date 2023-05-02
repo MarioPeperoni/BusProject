@@ -1,5 +1,3 @@
-from Enum_transport_type import TransportType
-
 
 class Station:
     """
@@ -33,6 +31,13 @@ class Station:
         if len(stations) > 0:
             return stations
         return None
+
+    def __init__(self, stationName, stationID, transportType, coordinateX, coordinateY):
+        self.stationName = stationName
+        self.stationID = stationID
+        self.transportType = transportType
+        self.coordinateX = coordinateX
+        self.coordinateY = coordinateY
 
     def to_dict(self):
         """

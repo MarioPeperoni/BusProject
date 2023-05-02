@@ -4,9 +4,9 @@ from enum import Enum
 class TransportType(Enum):
     """
     Enumeration of transport types
-    :param Bus: 1
-    :param Tram: 2
-    :param Train: 3
+    :param Bus: 0
+    :param Tram: 1
+    :param Train: 2
     """
     Bus = 0
     Tram = 1
