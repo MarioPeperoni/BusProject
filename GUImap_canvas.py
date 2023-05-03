@@ -1,10 +1,13 @@
+import tkinter
 from tkinter import Canvas
 
 from file_handle import stations, map_details
 
 import file_handle
 
-canvas = None
+canvas = Canvas
+max_zoom = 10
+canvas_scale = 1
 
 globals()["stations"] = file_handle.return_list_of_stations()
 globals()["map_details"] = file_handle.return_list_of_map_details()
@@ -19,9 +22,64 @@ def create_canvas(tk):
     global canvas
     global stations
     canvas = Canvas(tk, width=800, height=600)
+
+    canvas.bind("<MouseWheel>", zoom)
+    canvas.bind("<ButtonPress-1>", start_drag)
+    canvas.bind("<B1-Motion>", drag)
+
+    # Draw the map details
     draw_map_details()
+
+    # Draw the stations
     draw_stations(stations)
     return canvas
+
+
+def zoom(event):
+    """
+    Zooms the map in and out
+    :param event: event
+    :return:
+    """
+    global canvas
+    global max_zoom
+    global canvas_scale
+
+    # Get the mouse wheel delta
+    if event.delta > 0:
+        scale = 1.1
+    elif event.delta < 0:
+        scale = 0.9
+
+    if canvas_scale * scale > max_zoom:
+        return
+    canvas_scale *= scale
+
+    # Update the scale
+    canvas.scale("all", event.x, event.y, scale, scale)
+
+
+def start_drag(event):
+    """
+    Starts dragging the map with the mouse
+    :param event:
+    :return:
+    """
+    global canvas
+    canvas.drag_start_x = event.x
+    canvas.drag_start_y = event.y
+
+
+def drag(event):
+    """
+    Drags the map with the mouse
+    :param event: event
+    :return:
+    """
+    global canvas
+    canvas.move("all", event.x - canvas.drag_start_x, event.y - canvas.drag_start_y)
+    canvas.drag_start_x = event.x
+    canvas.drag_start_y = event.y
 
 
 def draw_map_details():
@@ -44,6 +102,7 @@ def draw_stations(stations):
     :return:
     """
     global canvas
+    global canvas_scale
 
     # Set the background color
     canvas.configure(bg="#1b7300")
@@ -60,4 +119,12 @@ def draw_stations(stations):
             color = "black"
         canvas.create_oval(station.coordinateX - 5, station.coordinateY - 5, station.coordinateX + 5,
                            station.coordinateY + 5, fill=color)
-        canvas.create_text(station.coordinateX + 10, station.coordinateY + 10, text=station.stationName)
+
+        # Draw the station name
+
+        # For now it is not adaptive to the zoom level
+        font_size = int(10)
+        font = ("Arial", font_size)
+
+        canvas.create_text(station.coordinateX + 10, station.coordinateY + 10, text=station.stationName, font=font,
+                           tags="station")
