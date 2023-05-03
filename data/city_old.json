@@ -50,6 +50,23 @@
                     "7:00",
                     "8:00"
                 ]
+            },
+            {
+                "transportType": 2,
+                "number": 14,
+                "name": "af",
+                "stops": [
+                    {
+                        "stationName": "Dworzec G\u0142\u00f3wny",
+                        "stationID": 1,
+                        "transportType": 2,
+                        "coordinateX": 450,
+                        "coordinateY": 200
+                    }
+                ],
+                "departureTimes": [
+                    "01:44"
+                ]
             }
         ],
         "map_details": [

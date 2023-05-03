@@ -26,12 +26,16 @@ def create_canvas(tk):
     canvas.bind("<MouseWheel>", zoom)
     canvas.bind("<ButtonPress-1>", start_drag)
     canvas.bind("<B1-Motion>", drag)
+    canvas.bind("<Motion>", update_mouse_position)
 
     # Draw the map details
     draw_map_details()
 
     # Draw the stations
     draw_stations(stations)
+
+    # Draw text with coordinated of the mouse
+    canvas.create_text(40, 580, text="(0, 0)", tags="mouse_position")
     return canvas
 
 
@@ -81,6 +85,22 @@ def drag(event):
     canvas.drag_start_x = event.x
     canvas.drag_start_y = event.y
 
+def update_mouse_position(event):
+    """
+    Updates the mouse position text
+    :param event: event
+    :return:
+    """
+    global canvas
+    global canvas_scale
+
+    # Get the mouse position
+    mouse_x = int(event.x / canvas_scale)
+    mouse_y = int(event.y / canvas_scale)
+
+    # Update the text
+    canvas.delete("mouse_position")
+    canvas.create_text(40, 580, text="(" + str(mouse_x) + ", " + str(mouse_y) + ")", tags="mouse_position")
 
 def draw_map_details():
     """
