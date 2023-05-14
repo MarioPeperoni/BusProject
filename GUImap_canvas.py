@@ -1,7 +1,4 @@
-import tkinter
 from tkinter import Canvas
-
-from file_handle import stations, map_details
 
 import file_handle
 
@@ -9,9 +6,11 @@ canvas = Canvas
 max_zoom = 10
 canvas_scale = 1
 
-globals()["stations"] = file_handle.return_list_of_stations()
-globals()["map_details"] = file_handle.return_list_of_map_details()
+stations = file_handle.return_list_of_stations()
+map_details = file_handle.return_list_of_map_details()
+map_color_scheme = file_handle.return_map_color_scheme()
 
+lightMode = False
 
 def create_canvas(tk):
     """
@@ -21,12 +20,17 @@ def create_canvas(tk):
     """
     global canvas
     global stations
+    global map_color_scheme
+
     canvas = Canvas(tk, width=800, height=600)
 
     canvas.bind("<MouseWheel>", zoom)
     canvas.bind("<ButtonPress-1>", start_drag)
     canvas.bind("<B1-Motion>", drag)
     canvas.bind("<Motion>", update_mouse_position)
+
+    # Set the background color
+    canvas.configure(bg=map_color_scheme.get("colorLightBG") if lightMode else map_color_scheme.get("colorDarkBG"))
 
     # Draw the map details
     draw_map_details()
@@ -85,6 +89,7 @@ def drag(event):
     canvas.drag_start_x = event.x
     canvas.drag_start_y = event.y
 
+
 def update_mouse_position(event):
     """
     Updates the mouse position text
@@ -101,6 +106,7 @@ def update_mouse_position(event):
     # Update the text
     canvas.delete("mouse_position")
     canvas.create_text(40, 580, text="(" + str(mouse_x) + ", " + str(mouse_y) + ")", tags="mouse_position")
+
 
 def draw_map_details():
     """
@@ -123,28 +129,37 @@ def draw_stations(stations):
     """
     global canvas
     global canvas_scale
-
-    # Set the background color
-    canvas.configure(bg="#1b7300")
+    global map_color_scheme
 
     # Draw the stations
     for station in stations:
         if station.transportType == 0:
-            color = "blue"
+            color = map_color_scheme.get("colorLightBusStation") \
+                if lightMode else map_color_scheme.get("colorDarkBusStation")
         elif station.transportType == 1:
-            color = "red"
+            color = map_color_scheme.get("colorLightTramStation") \
+                if lightMode else map_color_scheme.get("colorDarkTramStation")
         elif station.transportType == 2:
-            color = "yellow"
+            color = map_color_scheme.get("colorLightTrainStation") \
+                if lightMode else map_color_scheme.get("colorDarkTrainStation")
         else:
             color = "black"
-        canvas.create_oval(station.coordinateX - 5, station.coordinateY - 5, station.coordinateX + 5,
-                           station.coordinateY + 5, fill=color)
+
+        # Create the station circle
+        canvas.create_oval(station.coordinateX - 10, station.coordinateY - 10,
+                           station.coordinateX + 10, station.coordinateY + 10,
+                           fill=color,
+                           outline="black"
+                           if lightMode else "white", width=5)
 
         # Draw the station name
-
         # For now it is not adaptive to the zoom level
-        font_size = int(10)
-        font = ("Arial", font_size)
 
-        canvas.create_text(station.coordinateX + 10, station.coordinateY + 10, text=station.stationName, font=font,
+        # Set up the font
+        font_size = int(10)
+        font_color = map_color_scheme.get("colorLightText") if lightMode else map_color_scheme.get("colorDarkText")
+        font = ("Arial", font_size, "bold")
+
+        canvas.create_text(station.coordinateX, station.coordinateY + 20, text=station.stationName,
+                           font=font, fill=font_color,
                            tags="station")

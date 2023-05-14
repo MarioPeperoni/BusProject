@@ -3,6 +3,7 @@ import json
 
 import xml.etree.ElementTree as ET
 
+import classes.Class_map_color as map_color
 from classes.Class_station import Station
 
 config = {
@@ -14,35 +15,6 @@ config = {
     'offset_x': 0,
     'offset_y': 0,
 }
-
-# TODO: Fix this
-def read_mapping_table():
-    """
-    Reads the mapping table from a JSON file and gives users the option to select a city
-    :return:
-    """
-    global config
-
-    # Read the mapping table
-    with open('data/mapping_table.json') as json_file:
-        mapping_table = json.load(json_file)
-
-    # Print the cities
-    for i in range(len(mapping_table)):
-        print(str(i) + ": " + mapping_table[i]['cityName'])
-
-    # Ask the user to select a city
-    selected_city = int(input("Select a city: "))
-
-    # Split area into chunks
-    chunk_size = 0.01
-    for x in range(int(mapping_table[selected_city]['left'] / chunk_size), int(mapping_table[selected_city]['right'] / chunk_size)):
-        for y in range(int(mapping_table[selected_city]['bottom'] / chunk_size), int(mapping_table[selected_city]['top'] / chunk_size)):
-            import_area(x * chunk_size, y * chunk_size, (x + 1) * chunk_size, (y + 1) * chunk_size, 500, x, y)
-            print(f'Imported chunk {x}, {y}')
-
-    # Create city
-    create_city(mapping_table[selected_city]['cityName'])
 
 
 def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0):
@@ -100,7 +72,7 @@ def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0)
         global map_size
         if axis.upper() == 'X':
             return int((float(value) - config['left']) * (config['map_size'] / (config['right'] - config['left']))
-                       + config['offset_x'])
+                       - config['offset_x'])
         if axis.upper() == 'Y':
             return int((float(value) - config['bottom']) * (-config['map_size'] / (config['top'] - config['bottom']))
                        + config['map_size'] - config['offset_y'])
@@ -190,12 +162,24 @@ def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0)
         json.dump(stations, file, indent=4)
 
 
-def create_city(city_name):
+def create_city(city_name, left, bottom, right, top, map_color_scheme=map_color.MapColorSchemeDefault):
     """
     Creates a new city
     """
 
-    print("Creating a new city " + city_name)
+    print("Creating a new city " + city_name + " with coordinates: "
+          + str(left) + ", " + str(bottom) + ", " + str(right) + ", " + str(top) + "...")
+
+    # Clear stations.json file
+    with open('data/stations.json', 'w') as file:
+        file.write('[]')
+
+    # Clear city.json file
+    with open('data/city.json', 'w') as file:
+        file.write('[]')
+
+    # Import area
+    import_area(left, bottom, right, top)
 
     # Load stations from JSON file
     with open('data/stations.json', 'r') as file:
@@ -206,7 +190,8 @@ def create_city(city_name):
         "cityName": city_name,
         "stations": stations,
         "transport_objects": [],
-        "map_details": []
+        "map_details": [],
+        "map_color_scheme": map_color_scheme.to_dict(),
     }
 
     # Save the city to a JSON file

@@ -58,6 +58,7 @@ def load_city():
     global stations
     global transport_objects
     global map_details
+    global map_color_scheme
 
     # Load all variables data from the JSON file
     cityName = data[0]['cityName']
@@ -67,6 +68,7 @@ def load_city():
         Station(s['stationName'], s['stationID'], s['transportType'], s['coordinateX'], s['coordinateY']) for s in
         t['stops']], t['departureTimes']) for t in data[0]['transport_objects']]
     map_details = [MapDetail(m['points'], m['color']) for m in data[0]['map_details']]
+    map_color_scheme = data[0]['map_color_scheme']
 
 
 def return_list_of_stations() -> List[Station]:
@@ -97,3 +99,13 @@ def return_list_of_map_details() -> List[MapDetail]:
     global map_details
     print(map_details)
     return map_details
+
+
+def return_map_color_scheme() -> dict:
+    """
+    Returns a map color scheme
+    """
+    load_city()
+    global map_color_scheme
+    print(map_color_scheme)
+    return map_color_scheme
