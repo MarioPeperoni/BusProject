@@ -11,13 +11,13 @@ transport_objects: list[TransportObject] = []
 map_details: list[MapDetail] = []
 
 
-def add_new_transport_entry_to_json(transportType, number, name, stops_names, departureTimes):
+def add_new_transport_entry_to_json(transportType, number, name, stops, departureTimes):
     """
     Adds a new transport entry to the JSON file
     :param transportType: type of transport
     :param number: number of the transport
     :param name: name of the transport
-    :param stops_names: list of stops names
+    :param stops: list of stops
     :param departureTimes: list of departure times
     :return:
     """
@@ -26,7 +26,6 @@ def add_new_transport_entry_to_json(transportType, number, name, stops_names, de
         data = json.load(file)
 
     # Get the list of stations
-    stops = Station.get_stations_by_names(stops_names, stations)
     stops = [stop.to_dict() for stop in stops]
 
     # Create a new entry

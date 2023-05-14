@@ -64,6 +64,10 @@ def zoom(event):
     # Scale map to mouse position
     CANVAS.scale("all", event.x, event.y, scale, scale)
 
+    # Redraw the stations
+    # UNCOMMENT FOR EXPERIMENTAL ZOOMING
+    # draw_stations(stations)
+
     output_debug_data()
 
 
@@ -127,7 +131,8 @@ def draw_stations(stations):
     global CANVAS_SCALE
     global map_color_scheme
 
-    CANVAS.delete("station")
+    CANVAS.delete("station_circle")
+    CANVAS.delete("station_name")
 
     # Draw the stations
     for station in stations:
@@ -154,7 +159,8 @@ def draw_stations(stations):
         CANVAS.create_oval(x1, y1, x2, y2,
                            fill=color,
                            outline="black" if LIGHT_MODE else "white",
-                           width=5 * CANVAS_SCALE, tags="station")
+                           width=5 * CANVAS_SCALE, tags=("station_circle", station.stationName, station.stationID))
+        print("Station: " + station.stationName + ", " + str(station.stationID))
 
         # Set up the font
         font_size = int(12 * CANVAS_SCALE)
@@ -166,9 +172,28 @@ def draw_stations(stations):
                            (station.coordinateY + DRAG_OFFSET[1]) * CANVAS_SCALE + 20 * CANVAS_SCALE,
                            text=station.stationName,
                            font=font, fill=font_color,
-                           tags="station")
+                           tags=("station_text", station.stationName, station.stationID))
 
 
 def output_debug_data():
     print("CANVAS_SCALE: " + str(CANVAS_SCALE))
     print("DRAG_OFFSET: " + str(DRAG_OFFSET))
+
+
+def draw_transport_path(stations_selected):
+    """
+    Highlights stations and draw the path between them
+    :param stations_selected:
+    :return:
+    """
+
+    # Print the stations
+    for station in stations_selected:
+        print(station.stationName)
+
+    # Find stations with the same ID
+    for station in stations_selected:
+        print("Station ID: " + str(station.stationID))
+        station_circle = CANVAS.find_withtag(station.stationName)[0]
+        station_text = CANVAS.find_withtag(station.stationName)[1]
+        CANVAS.itemconfig(station_circle, fill="yellow")

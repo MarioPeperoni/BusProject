@@ -8,6 +8,7 @@ from file_handle import stations
 
 from classes.Enum_transport_type import TransportType
 from classes.Class_transport_object import TransportObject
+from classes.Class_station import Station
 
 
 def create_window():
@@ -183,13 +184,16 @@ def create_window():
             messagebox.showerror("Error", "Please fill in all fields")
             return
 
+        # Convert stops to station objects
+        stops_object = Station.get_stations_by_names(stops, stations)
         # Add new transport entry to json file
-        file_handle.add_new_transport_entry_to_json(transportType.get(), int(number.get()), name.get(), stops,
+        file_handle.add_new_transport_entry_to_json(transportType.get(), int(number.get()), name.get(), stops_object,
                                                     departureTimes)
 
         # Refresh the transport paths
         file_handle.load_city()
-        newTransportEntry = TransportObject(transportType.get(), int(number.get()), name.get(), stops, departureTimes)
+        newTransportEntry = TransportObject(
+            transportType.get(), int(number.get()), name.get(), stops_object, departureTimes)
         GUIright_menu.refresh_transport_paths(newTransportEntry)
 
         # Close the form
