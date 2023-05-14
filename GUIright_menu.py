@@ -3,6 +3,7 @@ import tkinter as tk
 import GUIform_create_transport
 
 from file_handle import transport_objects
+from file_handle import cityName
 
 menu_right = None
 transport_listbox = None
@@ -17,6 +18,10 @@ def create_right_menu(root):
     global menu_right
     menu_right = tk.Frame(root)
     menu_right.size = "200x600"
+
+    # Create label for displaying the city name
+    city_name = tk.Label(menu_right, text=cityName, font=("Arial", 20, "bold"))
+    city_name.pack()
 
     # Create button in right frame for creating a new transport entry
     create_transport_button = tk.Button(menu_right, text="Create new path",
