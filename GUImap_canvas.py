@@ -2,15 +2,17 @@ from tkinter import Canvas
 
 import file_handle
 
-canvas = Canvas
-max_zoom = 10
-canvas_scale = 1
+# Global variables
+CANVAS = Canvas
+MAX_ZOOM = 2
+CANVAS_SCALE = 1
+DRAG_OFFSET = [0, 0]
+LIGHT_MODE = False
 
 stations = file_handle.return_list_of_stations()
 map_details = file_handle.return_list_of_map_details()
 map_color_scheme = file_handle.return_map_color_scheme()
 
-lightMode = False
 
 def create_canvas(tk):
     """
@@ -18,19 +20,19 @@ def create_canvas(tk):
     :param tk: tkinter
     :return:
     """
-    global canvas
+    global CANVAS
     global stations
     global map_color_scheme
 
-    canvas = Canvas(tk, width=800, height=600)
+    CANVAS = Canvas(tk)
 
-    canvas.bind("<MouseWheel>", zoom)
-    canvas.bind("<ButtonPress-1>", start_drag)
-    canvas.bind("<B1-Motion>", drag)
-    canvas.bind("<Motion>", update_mouse_position)
+    # Bind events
+    CANVAS.bind("<MouseWheel>", zoom)
+    CANVAS.bind("<ButtonPress-1>", start_drag)
+    CANVAS.bind("<B1-Motion>", drag)
 
     # Set the background color
-    canvas.configure(bg=map_color_scheme.get("colorLightBG") if lightMode else map_color_scheme.get("colorDarkBG"))
+    CANVAS.configure(bg=map_color_scheme.get("colorLightBG") if LIGHT_MODE else map_color_scheme.get("colorDarkBG"))
 
     # Draw the map details
     draw_map_details()
@@ -38,9 +40,7 @@ def create_canvas(tk):
     # Draw the stations
     draw_stations(stations)
 
-    # Draw text with coordinated of the mouse
-    canvas.create_text(40, 580, text="(0, 0)", tags="mouse_position")
-    return canvas
+    return CANVAS
 
 
 def zoom(event):
@@ -49,9 +49,7 @@ def zoom(event):
     :param event: event
     :return:
     """
-    global canvas
-    global max_zoom
-    global canvas_scale
+    global CANVAS_SCALE
 
     # Get the mouse wheel delta
     if event.delta > 0:
@@ -59,12 +57,14 @@ def zoom(event):
     elif event.delta < 0:
         scale = 0.9
 
-    if canvas_scale * scale > max_zoom:
+    if CANVAS_SCALE * scale > MAX_ZOOM:
         return
-    canvas_scale *= scale
+    CANVAS_SCALE *= scale
 
-    # Update the scale
-    canvas.scale("all", event.x, event.y, scale, scale)
+    # Scale map to mouse position
+    CANVAS.scale("all", event.x, event.y, scale, scale)
+
+    output_debug_data()
 
 
 def start_drag(event):
@@ -73,9 +73,10 @@ def start_drag(event):
     :param event:
     :return:
     """
-    global canvas
-    canvas.drag_start_x = event.x
-    canvas.drag_start_y = event.y
+    global CANVAS
+    print("Start drag: " + str(event.x) + ", " + str(event.y))
+    CANVAS.drag_start_x = event.x
+    CANVAS.drag_start_y = event.y
 
 
 def drag(event):
@@ -84,28 +85,24 @@ def drag(event):
     :param event: event
     :return:
     """
-    global canvas
-    canvas.move("all", event.x - canvas.drag_start_x, event.y - canvas.drag_start_y)
-    canvas.drag_start_x = event.x
-    canvas.drag_start_y = event.y
+    global CANVAS
+    global DRAG_OFFSET
+    global CANVAS_SCALE
 
+    # Calculate the drag offset
+    dx = event.x - CANVAS.drag_start_x
+    dy = event.y - CANVAS.drag_start_y
 
-def update_mouse_position(event):
-    """
-    Updates the mouse position text
-    :param event: event
-    :return:
-    """
-    global canvas
-    global canvas_scale
+    # Update the drag offset
+    DRAG_OFFSET[0] += dx
+    DRAG_OFFSET[1] += dy
 
-    # Get the mouse position
-    mouse_x = int(event.x / canvas_scale)
-    mouse_y = int(event.y / canvas_scale)
+    # Move the map
+    CANVAS.move("all", dx, dy)
+    CANVAS.drag_start_x = event.x
+    CANVAS.drag_start_y = event.y
 
-    # Update the text
-    canvas.delete("mouse_position")
-    canvas.create_text(40, 580, text="(" + str(mouse_x) + ", " + str(mouse_y) + ")", tags="mouse_position")
+    print("Drag offset: " + str(DRAG_OFFSET[0]) + ", " + str(DRAG_OFFSET[1]))
 
 
 def draw_map_details():
@@ -113,12 +110,12 @@ def draw_map_details():
     Draws the map details on the canvas
     :return:
     """
-    global canvas
+    global CANVAS
     global map_details
 
     # Draw the map details
     for map_detail in map_details:
-        canvas.create_polygon(map_detail.points, fill=map_detail.color)
+        CANVAS.create_polygon(map_detail.points, fill=map_detail.color)
 
 
 def draw_stations(stations):
@@ -127,39 +124,51 @@ def draw_stations(stations):
     :param stations: list of Station objects
     :return:
     """
-    global canvas
-    global canvas_scale
+    global CANVAS_SCALE
     global map_color_scheme
+
+    CANVAS.delete("station")
 
     # Draw the stations
     for station in stations:
         if station.transportType == 0:
             color = map_color_scheme.get("colorLightBusStation") \
-                if lightMode else map_color_scheme.get("colorDarkBusStation")
+                if LIGHT_MODE else map_color_scheme.get("colorDarkBusStation")
         elif station.transportType == 1:
             color = map_color_scheme.get("colorLightTramStation") \
-                if lightMode else map_color_scheme.get("colorDarkTramStation")
+                if LIGHT_MODE else map_color_scheme.get("colorDarkTramStation")
         elif station.transportType == 2:
             color = map_color_scheme.get("colorLightTrainStation") \
-                if lightMode else map_color_scheme.get("colorDarkTrainStation")
+                if LIGHT_MODE else map_color_scheme.get("colorDarkTrainStation")
         else:
             color = "black"
 
-        # Create the station circle
-        canvas.create_oval(station.coordinateX - 10, station.coordinateY - 10,
-                           station.coordinateX + 10, station.coordinateY + 10,
-                           fill=color,
-                           outline="black"
-                           if lightMode else "white", width=5)
+        # Calculate the updated coordinates and size of the station circle
+        r = 10 * CANVAS_SCALE  # radius of circle
+        x1 = (station.coordinateX + DRAG_OFFSET[0]) * CANVAS_SCALE - r
+        y1 = (station.coordinateY + DRAG_OFFSET[1]) * CANVAS_SCALE - r
+        x2 = (station.coordinateX + DRAG_OFFSET[0]) * CANVAS_SCALE + r
+        y2 = (station.coordinateY + DRAG_OFFSET[1]) * CANVAS_SCALE + r
 
-        # Draw the station name
-        # For now it is not adaptive to the zoom level
+        # Create the station circle
+        CANVAS.create_oval(x1, y1, x2, y2,
+                           fill=color,
+                           outline="black" if LIGHT_MODE else "white",
+                           width=5 * CANVAS_SCALE, tags="station")
 
         # Set up the font
-        font_size = int(10)
-        font_color = map_color_scheme.get("colorLightText") if lightMode else map_color_scheme.get("colorDarkText")
+        font_size = int(12 * CANVAS_SCALE)
+        font_color = map_color_scheme.get("colorLightText") if LIGHT_MODE else map_color_scheme.get("colorDarkText")
         font = ("Arial", font_size, "bold")
 
-        canvas.create_text(station.coordinateX, station.coordinateY + 20, text=station.stationName,
+        # Draw the station name
+        CANVAS.create_text((station.coordinateX + DRAG_OFFSET[0]) * CANVAS_SCALE,
+                           (station.coordinateY + DRAG_OFFSET[1]) * CANVAS_SCALE + 20 * CANVAS_SCALE,
+                           text=station.stationName,
                            font=font, fill=font_color,
                            tags="station")
+
+
+def output_debug_data():
+    print("CANVAS_SCALE: " + str(CANVAS_SCALE))
+    print("DRAG_OFFSET: " + str(DRAG_OFFSET))

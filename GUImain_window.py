@@ -13,7 +13,6 @@ def create_main_window():
     window = tk.Tk()
     window.geometry("980x600")
     window.title("Bus Project")
-    window.resizable(False, False)
 
     # Create a canvas for displaying the map
     GUImap_canvas.create_canvas(window).pack(side="left", fill="both", expand=True, pady=5)

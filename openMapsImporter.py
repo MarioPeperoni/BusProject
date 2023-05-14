@@ -162,7 +162,7 @@ def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0)
         json.dump(stations, file, indent=4)
 
 
-def create_city(city_name, left, bottom, right, top, map_color_scheme=map_color.MapColorSchemeDefault):
+def create_city(city_name, left, bottom, right, top, size=2000, map_color_scheme=map_color.MapColorSchemeDefault):
     """
     Creates a new city
     """
@@ -179,7 +179,7 @@ def create_city(city_name, left, bottom, right, top, map_color_scheme=map_color.
         file.write('[]')
 
     # Import area
-    import_area(left, bottom, right, top)
+    import_area(left, bottom, right, top, size)
 
     # Load stations from JSON file
     with open('data/stations.json', 'r') as file:

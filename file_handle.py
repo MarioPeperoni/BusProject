@@ -77,7 +77,6 @@ def return_list_of_stations() -> List[Station]:
     """
     load_city()
     global stations
-    print(stations)
     return stations
 
 
@@ -87,7 +86,6 @@ def return_list_of_transport_objects() -> List[TransportObject]:
     """
     load_city()
     global transport_objects
-    print(transport_objects)
     return transport_objects
 
 
@@ -97,7 +95,6 @@ def return_list_of_map_details() -> List[MapDetail]:
     """
     load_city()
     global map_details
-    print(map_details)
     return map_details
 
 
@@ -107,5 +104,4 @@ def return_map_color_scheme() -> dict:
     """
     load_city()
     global map_color_scheme
-    print(map_color_scheme)
     return map_color_scheme

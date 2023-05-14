@@ -1,8 +1,7 @@
 import file_handle
 import openMapsImporter
 
-# openMapsImporter.read_mapping_table()
-openMapsImporter.create_city("Witomino", 18.4914, 54.4884, 18.5242, 54.5055)
+openMapsImporter.create_city("Witomino", 18.4927, 54.4900, 18.5205, 54.5040, 1000)
 file_handle.load_city()
 
 import GUImain_window
