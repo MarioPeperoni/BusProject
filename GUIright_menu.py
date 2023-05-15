@@ -6,8 +6,8 @@ import GUImap_canvas
 from file_handle import transport_objects
 from file_handle import cityName
 
-menu_right = None
-transport_listbox = None
+MENU_RIGHT = None
+TRANSPORT_LISTBOX = None
 
 
 def create_right_menu(root):
@@ -16,35 +16,37 @@ def create_right_menu(root):
     :param root: window of the application
     :return:
     """
-    global menu_right
-    menu_right = tk.Frame(root)
-    menu_right.size = "200x600"
+    global MENU_RIGHT
+    MENU_RIGHT = tk.Frame(root)
+    MENU_RIGHT.size = "200x600"
 
     # Create label for displaying the city name
-    city_name = tk.Label(menu_right, wraplength=200, text=cityName, font=("Arial", 20, "bold"))
+    city_name = tk.Label(MENU_RIGHT, wraplength=200, text=cityName, font=("Arial", 20, "bold"))
     city_name.pack()
 
     # Create button in right frame for creating a new transport entry
-    create_transport_button = tk.Button(menu_right, text="Create new path",
+    create_transport_button = tk.Button(MENU_RIGHT, text="Create new path",
                                         command=GUIform_create_transport.create_window)
     create_transport_button.pack()
 
     # Declare variable for transport type
-    GUIform_create_transport.transportType = tk.IntVar(value=1)
+    GUIform_create_transport.transportType = tk.IntVar(value=0)
+
     # Create radio buttons for transport types
-    transportType_bus = tk.Radiobutton(menu_right, text="Bus", variable=GUIform_create_transport.transportType, value=1)
+    transportType_bus = tk.Radiobutton(MENU_RIGHT, text="Bus", variable=GUIform_create_transport.transportType,
+                                       value=0, command=refresh_transport_paths)
     transportType_bus.pack()
-    transportType_tram = tk.Radiobutton(menu_right, text="Tram", variable=GUIform_create_transport.transportType,
-                                        value=2)
+    transportType_tram = tk.Radiobutton(MENU_RIGHT, text="Tram", variable=GUIform_create_transport.transportType,
+                                        value=1, command=refresh_transport_paths)
     transportType_tram.pack()
-    transportType_train = tk.Radiobutton(menu_right, text="Train", variable=GUIform_create_transport.transportType,
-                                         value=3)
+    transportType_train = tk.Radiobutton(MENU_RIGHT, text="Train", variable=GUIform_create_transport.transportType,
+                                         value=2, command=refresh_transport_paths)
     transportType_train.pack()
 
     # Create listbox for displaying all connections
-    create_listbox(menu_right).pack(pady=10, side=tk.TOP, fill=tk.BOTH, expand=True)
+    create_listbox(MENU_RIGHT).pack(pady=10, side=tk.TOP, fill=tk.BOTH, expand=True)
 
-    return menu_right
+    return MENU_RIGHT
 
 
 def create_listbox(root):
@@ -53,47 +55,49 @@ def create_listbox(root):
     :param root: root of the listbox
     :return:
     """
-    global transport_listbox
+    global TRANSPORT_LISTBOX
 
     # Create listbox for displaying all transports
-    transport_listbox = tk.Listbox(menu_right, height=1000)
+    TRANSPORT_LISTBOX = tk.Listbox(MENU_RIGHT, height=1000)
 
     # Sort transport objects by number
     transport_objects.sort(key=lambda x: x.number)
 
     # Create a scrollbar for the listbox
-    tk.Scrollbar(menu_right, orient="vertical")
+    tk.Scrollbar(MENU_RIGHT, orient="vertical")
 
     # Iterate over the transport objects and insert their names into the Listbox
     for transport in transport_objects:
-        transport_listbox.insert(tk.END, "#" + str(transport.number) + " " + transport.name)
+        TRANSPORT_LISTBOX.insert(tk.END, "#" + str(transport.number) + " " + transport.name)
 
     # Bind buttons to listbox
-    transport_listbox.bind("<Button-3>", show_context_menu)
-    transport_listbox.bind("<<ListboxSelect>>", transport_highlight_path)
+    TRANSPORT_LISTBOX.bind("<Button-3>", show_context_menu)
+    TRANSPORT_LISTBOX.bind("<<ListboxSelect>>", transport_highlight_path)
 
-    return transport_listbox
+    return TRANSPORT_LISTBOX
 
 
-def refresh_transport_paths(newTransportObject):
+def refresh_transport_paths(newTransportObject=None):
     """
     Refreshes the listbox with transport paths
     """
-    global transport_listbox
+    global TRANSPORT_LISTBOX
     # Delete all items from listbox
-    transport_listbox.delete(0, tk.END)
+    TRANSPORT_LISTBOX.delete(0, tk.END)
 
-    # Add new transport object to list of transport objects
-    transport_objects.append(newTransportObject)
+    # Add new transport object to list of transport objects if it is not None
+    if newTransportObject is not None:
+        transport_objects.append(newTransportObject)
 
     # Sort transport objects by number
     transport_objects.sort(key=lambda x: x.number)
 
     # Iterate over the transport objects and insert their names into the Listbox
     for transport in transport_objects:
-        transport_listbox.insert(tk.END, "#" + str(transport.number) + " " + transport.name)
+        if transport.transportType == GUIform_create_transport.transportType.get():
+            TRANSPORT_LISTBOX.insert(tk.END, "#" + str(transport.number) + " " + transport.name)
 
-    transport_listbox.update()
+    TRANSPORT_LISTBOX.update()
 
 
 def transport_highlight_path(event):
@@ -101,11 +105,11 @@ def transport_highlight_path(event):
     Highlights the selected transport path on the map
     :return:
     """
-    selected_index = transport_listbox.curselection()[0]
+    selected_index = TRANSPORT_LISTBOX.curselection()[0]
     selected_transport = transport_objects[selected_index]
 
-    # Print selected transport path
-    GUImap_canvas.draw_transport_path(selected_transport.stops, 0)
+    # Draw selected transport path
+    GUImap_canvas.draw_transport_path(selected_transport.stops, GUIform_create_transport.transportType.get())
 
 
 def show_context_menu(event):
@@ -114,10 +118,10 @@ def show_context_menu(event):
     :param event: event that triggered the function
     :return:
     """
-    global transport_listbox
+    global TRANSPORT_LISTBOX
 
     # Create context menu
-    context_menu = tk.Menu(transport_listbox, tearoff=0)
+    context_menu = tk.Menu(TRANSPORT_LISTBOX, tearoff=0)
 
     # TODO: Add context menu options
     # context_menu.add_command(label="Delete", command=delete_transport)

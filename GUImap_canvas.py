@@ -109,6 +109,7 @@ def drag(event):
     # Refresh the canvas
     refresh_canvas()
 
+
 def refresh_canvas():
     """
     Redraws the canvas
@@ -127,7 +128,6 @@ def refresh_canvas():
     # Redraw paths
     if PATH_DRAWING:
         draw_transport_path(PATH_STATIONS, PATH_TYPE)
-
 
 
 def draw_map_details():
@@ -180,7 +180,7 @@ def draw_stations(stations):
         CANVAS.create_oval(x1, y1, x2, y2,
                            fill=color,
                            outline="black" if LIGHT_MODE else "white",
-                           width=5 * CANVAS_SCALE, tags=("station_circle",
+                           width=4 * CANVAS_SCALE, tags=("station_circle",
                                                          station.stationName, station.stationID, station.transportType))
 
         # Set up the font
@@ -196,7 +196,7 @@ def draw_stations(stations):
                            tags=("station_text", station.stationName, station.stationID, station.transportType))
 
 
-def draw_transport_path(stations_selected, type):
+def draw_transport_path(stations_selected, type, custom_color=None):
     """
     Highlights stations and draw the path between them
     :param stations_selected:
@@ -205,6 +205,7 @@ def draw_transport_path(stations_selected, type):
     global PATH_DRAWING
     global PATH_TYPE
     global PATH_STATIONS
+    global COLOR
 
     # Set the path drawing variables
     PATH_DRAWING = True
@@ -225,27 +226,26 @@ def draw_transport_path(stations_selected, type):
         x2 = (station2.coordinateX + DRAG_OFFSET[0]) * CANVAS_SCALE
         y2 = (station2.coordinateY + DRAG_OFFSET[1]) * CANVAS_SCALE
 
-        # Draw the line between the stations
-        if type == 0:
-            CANVAS.create_line(x1, y1, x2, y2,
-                               fill=map_color_scheme.get(
-                                   "colorLightBusStation") if LIGHT_MODE else map_color_scheme.get(
-                                   "colorDarkBusStation"),
-                               width=5 * CANVAS_SCALE,
-                               tags=("transport_path", station1.stationName, station2.stationName))
-        elif type == 1:
-            CANVAS.create_line(x1, y1, x2, y2,
-                               fill=map_color_scheme.get(
-                                   "colorLightTramStation") if LIGHT_MODE else map_color_scheme.get(
-                                   "colorDarkTramStation"),
-                               width=5 * CANVAS_SCALE,
-                               tags=("transport_path", station1.stationName, station2.stationName))
-        elif type == 2:
-            CANVAS.create_line(x1, y1, x2, y2,
-                               fill=map_color_scheme.get(
-                                   "colorLightTrainStation") if LIGHT_MODE else map_color_scheme.get(
-                                   "colorDarkTrainStation"),
-                               width=5 * CANVAS_SCALE,
-                               tags=("transport_path", station1.stationName, station2.stationName))
+        # Check for custom color
+        if custom_color is None:
+
+            # Set color based on transport type
+            if type == 0:
+                COLOR = map_color_scheme.get("colorLightBusStation") \
+                    if LIGHT_MODE else map_color_scheme.get("colorDarkBusStation")
+            elif type == 1:
+                COLOR = map_color_scheme.get("colorLightTramStation") \
+                    if LIGHT_MODE else map_color_scheme.get("colorDarkTramStation")
+            elif type == 2:
+                COLOR = map_color_scheme.get("colorLightTrainStation") \
+                    if LIGHT_MODE else map_color_scheme.get("colorDarkTrainStation")
+        else:
+            # Set the color to the custom color
+            COLOR = custom_color
+
+        CANVAS.create_line(x1, y1, x2, y2,
+                           fill=COLOR,
+                           width=5 * CANVAS_SCALE,
+                           tags=("transport_path", station1.stationName, station2.stationName))
         # Move the path to the back
         CANVAS.tag_lower("transport_path")
