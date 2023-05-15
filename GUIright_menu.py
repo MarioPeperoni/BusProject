@@ -6,8 +6,12 @@ import GUImap_canvas
 from file_handle import transport_objects
 from file_handle import cityName
 
-MENU_RIGHT = None
-TRANSPORT_LISTBOX = None
+from file_handle import bus_objects
+from file_handle import tram_objects
+from file_handle import train_objects
+
+MENU_RIGHT = tk.Frame
+TRANSPORT_LISTBOX = tk.Listbox
 
 
 def create_right_menu(root):
@@ -68,7 +72,8 @@ def create_listbox(root):
 
     # Iterate over the transport objects and insert their names into the Listbox
     for transport in transport_objects:
-        TRANSPORT_LISTBOX.insert(tk.END, "#" + str(transport.number) + " " + transport.name)
+        if transport.transportType == GUIform_create_transport.transportType.get():
+            TRANSPORT_LISTBOX.insert(tk.END, "#" + str(transport.number) + " " + transport.name)
 
     # Bind buttons to listbox
     TRANSPORT_LISTBOX.bind("<Button-3>", show_context_menu)
@@ -105,8 +110,13 @@ def transport_highlight_path(event):
     Highlights the selected transport path on the map
     :return:
     """
-    selected_index = TRANSPORT_LISTBOX.curselection()[0]
-    selected_transport = transport_objects[selected_index]
+    # Get selected transport object
+    if GUIform_create_transport.transportType.get() == 0:
+        selected_transport = bus_objects[TRANSPORT_LISTBOX.curselection()[0]]
+    elif GUIform_create_transport.transportType.get() == 1:
+        selected_transport = tram_objects[TRANSPORT_LISTBOX.curselection()[0]]
+    elif GUIform_create_transport.transportType.get() == 2:
+        selected_transport = train_objects[TRANSPORT_LISTBOX.curselection()[0]]
 
     # Draw selected transport path
     GUImap_canvas.draw_transport_path(selected_transport.stops, GUIform_create_transport.transportType.get())

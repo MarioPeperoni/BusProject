@@ -7,8 +7,13 @@ from classes.Class_map_detail import MapDetail
 
 cityName = ""
 stations: list[Station] = []
-transport_objects: list[TransportObject] = []
 map_details: list[MapDetail] = []
+
+# Transport objects
+transport_objects: list[TransportObject] = []  # For legacy use
+bus_objects: list[TransportObject] = []
+tram_objects: list[TransportObject] = []
+train_objects: list[TransportObject] = []
 
 
 def add_new_transport_entry_to_json(transportType, number, name, stops, departureTimes):
@@ -58,6 +63,9 @@ def load_city():
     global transport_objects
     global map_details
     global map_color_scheme
+    global bus_objects
+    global tram_objects
+    global train_objects
 
     # Load all variables data from the JSON file
     cityName = data[0]['cityName']
@@ -68,6 +76,11 @@ def load_city():
         t['stops']], t['departureTimes']) for t in data[0]['transport_objects']]
     map_details = [MapDetail(m['points'], m['color']) for m in data[0]['map_details']]
     map_color_scheme = data[0]['map_color_scheme']
+
+    # Split transport objects into separate lists
+    bus_objects = [transport for transport in transport_objects if transport.transportType == 0]
+    tram_objects = [transport for transport in transport_objects if transport.transportType == 1]
+    train_objects = [transport for transport in transport_objects if transport.transportType == 2]
 
 
 def return_list_of_stations() -> List[Station]:
