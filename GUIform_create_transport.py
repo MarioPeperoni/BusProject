@@ -45,6 +45,8 @@ def create_window():
     transportType_tram.grid(row=0, column=2, sticky="w")
     transportType_train = tk.Radiobutton(form, text="Train", variable=transportType, value=TransportType.Train.value)
     transportType_train.grid(row=0, column=3, sticky="w")
+    transportType_metro = tk.Radiobutton(form, text="Metro", variable=transportType, value=TransportType.Metro.value)
+    transportType_metro.grid(row=0, column=4, sticky="w")
 
     def check_for_number(entry):
         """
@@ -70,7 +72,7 @@ def create_window():
 
     # Create a separator
     seperator1 = ttk.Separator(form, orient="horizontal")
-    seperator1.grid(row=3, column=0, columnspan=4, sticky="ew", pady=10, padx=10)
+    seperator1.grid(row=3, column=0, columnspan=5, sticky="ew", pady=10, padx=10)
 
     # Create a function to add a selected station
     def add_stop():
@@ -113,7 +115,7 @@ def create_window():
 
     # Create a separator
     seperator2 = ttk.Separator(form, orient="horizontal")
-    seperator2.grid(row=6, column=0, columnspan=4, sticky="ew", pady=10, padx=10)
+    seperator2.grid(row=6, column=0, columnspan=5, sticky="ew", pady=10, padx=10)
 
     def check_for_length(entry):
         """
@@ -172,7 +174,7 @@ def create_window():
 
     # Create a separator
     seperator3 = ttk.Separator(form, orient="horizontal")
-    seperator3.grid(row=10, column=0, columnspan=4, sticky="ew", pady=10, padx=10)
+    seperator3.grid(row=10, column=0, columnspan=5, sticky="ew", pady=10, padx=10)
 
     def submit_form():
         """
@@ -191,7 +193,6 @@ def create_window():
                                                     departureTimes)
 
         # Refresh the transport paths
-        file_handle.load_city()
         newTransportEntry = TransportObject(
             transportType.get(), int(number.get()), name.get(), stops_object, departureTimes)
         GUIright_menu.refresh_transport_paths(newTransportEntry)

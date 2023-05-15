@@ -11,6 +11,7 @@ class TransportType(Enum):
     Bus = 0
     Tram = 1
     Train = 2
+    Metro = 3
 
     def return_transport_type(self):
         """

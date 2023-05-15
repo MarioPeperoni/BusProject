@@ -144,6 +144,26 @@ def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0)
                             ))
                 print(f'Train {stations_list[-1].stationName} at {node.get("lon")}, {node.get("lat")} created')
 
+        # Check for subway station
+        if node.find("tag[@k='subway']") is not None \
+            and node.find("tag[@k='subway']").get('v') == 'yes' \
+            and node.find("tag[@k='public_transport']").get('v') == 'stop_position':
+
+            # Check if the station is already in the list
+            name = node.find("tag[@k='name']").get('v')
+            transport_type = 3
+            if (name, transport_type) not in seen_stations:
+                seen_stations.add((name, transport_type))
+                stations_list.append(
+                    Station(node.find(
+                        "tag[@k='name']").get('v'),
+                            node.get('id'),
+                            3,
+                            scale('X', node.get('lon')),
+                            scale('Y', node.get('lat'))
+                            ))
+                print(f'Subway {stations_list[-1].stationName} at {node.get("lon")}, {node.get("lat")} created')
+
     try:
         # Open json file with stations
         with open('data/stations.json', 'r') as file:

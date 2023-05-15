@@ -26,6 +26,9 @@ class MapColorScheme:
     # Color Scheme train station
     colorLightTrainStation = '#f0cb15'
     colorDarkTrainStation = '#f0cb15'
+    # Color Scheme metro station
+    colorLightMetroStation = '#be93d4'
+    colorDarkMetroStation = '#be93d4'
 
     def to_dict(self):
         """
@@ -47,7 +50,9 @@ class MapColorScheme:
             'colorLightTramStation': self.colorLightTramStation,
             'colorDarkTramStation': self.colorDarkTramStation,
             'colorLightTrainStation': self.colorLightTrainStation,
-            'colorDarkTrainStation': self.colorDarkTrainStation
+            'colorDarkTrainStation': self.colorDarkTrainStation,
+            'colorLightMetroStation': self.colorLightMetroStation,
+            'colorDarkMetroStation': self.colorDarkMetroStation
         }
 
 

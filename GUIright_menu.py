@@ -1,4 +1,5 @@
 import tkinter as tk
+import importlib
 
 import GUIform_create_transport
 import GUImap_canvas
@@ -9,6 +10,7 @@ from file_handle import cityName
 from file_handle import bus_objects
 from file_handle import tram_objects
 from file_handle import train_objects
+from file_handle import metro_objects
 
 MENU_RIGHT = tk.Frame
 TRANSPORT_LISTBOX = tk.Listbox
@@ -46,6 +48,9 @@ def create_right_menu(root):
     transportType_train = tk.Radiobutton(MENU_RIGHT, text="Train", variable=GUIform_create_transport.transportType,
                                          value=2, command=refresh_transport_paths)
     transportType_train.pack()
+    transportType_metro = tk.Radiobutton(MENU_RIGHT, text="Metro", variable=GUIform_create_transport.transportType,
+                                         value=3, command=refresh_transport_paths)
+    transportType_metro.pack()
 
     # Create listbox for displaying all connections
     create_listbox(MENU_RIGHT).pack(pady=10, side=tk.TOP, fill=tk.BOTH, expand=True)
@@ -87,12 +92,20 @@ def refresh_transport_paths(newTransportObject=None):
     Refreshes the listbox with transport paths
     """
     global TRANSPORT_LISTBOX
+
     # Delete all items from listbox
     TRANSPORT_LISTBOX.delete(0, tk.END)
 
     # Add new transport object to list of transport objects if it is not None
     if newTransportObject is not None:
+        global transport_objects, bus_objects, tram_objects, train_objects, metro_objects
         transport_objects.append(newTransportObject)
+
+        # Split transport objects into separate lists
+        bus_objects = [transport for transport in transport_objects if transport.transportType == 0]
+        tram_objects = [transport for transport in transport_objects if transport.transportType == 1]
+        train_objects = [transport for transport in transport_objects if transport.transportType == 2]
+        metro_objects = [transport for transport in transport_objects if transport.transportType == 3]
 
     # Sort transport objects by number
     transport_objects.sort(key=lambda x: x.number)
@@ -110,6 +123,7 @@ def transport_highlight_path(event):
     Highlights the selected transport path on the map
     :return:
     """
+
     # Get selected transport object
     if GUIform_create_transport.transportType.get() == 0:
         selected_transport = bus_objects[TRANSPORT_LISTBOX.curselection()[0]]
@@ -117,6 +131,8 @@ def transport_highlight_path(event):
         selected_transport = tram_objects[TRANSPORT_LISTBOX.curselection()[0]]
     elif GUIform_create_transport.transportType.get() == 2:
         selected_transport = train_objects[TRANSPORT_LISTBOX.curselection()[0]]
+    elif GUIform_create_transport.transportType.get() == 3:
+        selected_transport = metro_objects[TRANSPORT_LISTBOX.curselection()[0]]
 
     # Draw selected transport path
     GUImap_canvas.draw_transport_path(selected_transport.stops, GUIform_create_transport.transportType.get())
@@ -142,3 +158,13 @@ def show_context_menu(event):
         context_menu.tk_popup(event.x_root, event.y_root)
     finally:
         context_menu.grab_release()
+
+
+def reload_variables(modules):
+    """
+    Reloads all variables from modules
+    :param modules: list of modules to reload
+    :return:
+    """
+    for module in modules:
+        importlib.reload(module)

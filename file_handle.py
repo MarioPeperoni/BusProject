@@ -6,6 +6,7 @@ from classes.Class_transport_object import TransportObject
 from classes.Class_map_detail import MapDetail
 
 cityName = ""
+map_color_scheme = None
 stations: list[Station] = []
 map_details: list[MapDetail] = []
 
@@ -14,6 +15,7 @@ transport_objects: list[TransportObject] = []  # For legacy use
 bus_objects: list[TransportObject] = []
 tram_objects: list[TransportObject] = []
 train_objects: list[TransportObject] = []
+metro_objects: list[TransportObject] = []
 
 
 def add_new_transport_entry_to_json(transportType, number, name, stops, departureTimes):
@@ -45,9 +47,12 @@ def add_new_transport_entry_to_json(transportType, number, name, stops, departur
     # Add the new entry to the data
     data[0]["transport_objects"].append(new_entry)
 
-    # Open the JSON file for writing
+    # Save the data
     with open("data/city.json", "w") as file:
         json.dump(data, file, indent=4)
+
+    # Reload the city
+    load_city()
 
 
 def load_city():
@@ -66,6 +71,7 @@ def load_city():
     global bus_objects
     global tram_objects
     global train_objects
+    global metro_objects
 
     # Load all variables data from the JSON file
     cityName = data[0]['cityName']
@@ -81,39 +87,4 @@ def load_city():
     bus_objects = [transport for transport in transport_objects if transport.transportType == 0]
     tram_objects = [transport for transport in transport_objects if transport.transportType == 1]
     train_objects = [transport for transport in transport_objects if transport.transportType == 2]
-
-
-def return_list_of_stations() -> List[Station]:
-    """
-    Returns a list of stations
-    """
-    load_city()
-    global stations
-    return stations
-
-
-def return_list_of_transport_objects() -> List[TransportObject]:
-    """
-    Returns a list of transport objects
-    """
-    load_city()
-    global transport_objects
-    return transport_objects
-
-
-def return_list_of_map_details() -> List[MapDetail]:
-    """
-    Returns a list of map details
-    """
-    load_city()
-    global map_details
-    return map_details
-
-
-def return_map_color_scheme() -> dict:
-    """
-    Returns a map color scheme
-    """
-    load_city()
-    global map_color_scheme
-    return map_color_scheme
+    metro_objects = [transport for transport in transport_objects if transport.transportType == 3]

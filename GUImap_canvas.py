@@ -1,5 +1,9 @@
 from tkinter import Canvas
 
+from file_handle import stations
+from file_handle import map_details
+from file_handle import map_color_scheme
+
 import file_handle
 
 # Global variables
@@ -14,10 +18,6 @@ PATH_DRAWING = False
 PATH_STATIONS = []
 PATH_TYPE = 0
 
-stations = file_handle.return_list_of_stations()
-map_details = file_handle.return_list_of_map_details()
-map_color_scheme = file_handle.return_map_color_scheme()
-
 
 def create_canvas(tk):
     """
@@ -26,8 +26,6 @@ def create_canvas(tk):
     :return:
     """
     global CANVAS
-    global stations
-    global map_color_scheme
 
     CANVAS = Canvas(tk)
 
@@ -136,7 +134,6 @@ def draw_map_details():
     :return:
     """
     global CANVAS
-    global map_details
 
     # Draw the map details
     for map_detail in map_details:
@@ -150,7 +147,6 @@ def draw_stations(stations):
     :return:
     """
     global CANVAS_SCALE
-    global map_color_scheme
 
     CANVAS.delete("station_circle")
     CANVAS.delete("station_text")
@@ -166,6 +162,9 @@ def draw_stations(stations):
         elif station.transportType == 2:
             color = map_color_scheme.get("colorLightTrainStation") \
                 if LIGHT_MODE else map_color_scheme.get("colorDarkTrainStation")
+        elif station.transportType == 3:
+            color = map_color_scheme.get("colorLightMetroStation") \
+                if LIGHT_MODE else map_color_scheme.get("colorDarkMetroStation")
         else:
             color = "black"
 
@@ -239,6 +238,9 @@ def draw_transport_path(stations_selected, type, custom_color=None):
             elif type == 2:
                 COLOR = map_color_scheme.get("colorLightTrainStation") \
                     if LIGHT_MODE else map_color_scheme.get("colorDarkTrainStation")
+            elif type == 3:
+                COLOR = map_color_scheme.get("colorLightMetroStation") \
+                    if LIGHT_MODE else map_color_scheme.get("colorDarkMetroStation")
         else:
             # Set the color to the custom color
             COLOR = custom_color
