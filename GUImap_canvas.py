@@ -9,6 +9,11 @@ CANVAS_SCALE = 1
 DRAG_OFFSET = [0, 0]
 LIGHT_MODE = False
 
+# Path drawing variables
+PATH_DRAWING = False
+PATH_STATIONS = []
+PATH_TYPE = 0
+
 stations = file_handle.return_list_of_stations()
 map_details = file_handle.return_list_of_map_details()
 map_color_scheme = file_handle.return_map_color_scheme()
@@ -64,11 +69,8 @@ def zoom(event):
     # Scale map to mouse position
     CANVAS.scale("all", event.x, event.y, scale, scale)
 
-    # Redraw the stations
-    # UNCOMMENT FOR EXPERIMENTAL ZOOMING
-    # draw_stations(stations)
-
-    output_debug_data()
+    # Refresh the canvas
+    refresh_canvas()
 
 
 def start_drag(event):
@@ -78,7 +80,6 @@ def start_drag(event):
     :return:
     """
     global CANVAS
-    print("Start drag: " + str(event.x) + ", " + str(event.y))
     CANVAS.drag_start_x = event.x
     CANVAS.drag_start_y = event.y
 
@@ -94,19 +95,39 @@ def drag(event):
     global CANVAS_SCALE
 
     # Calculate the drag offset
-    dx = event.x - CANVAS.drag_start_x
-    dy = event.y - CANVAS.drag_start_y
+    dx = (event.x - CANVAS.drag_start_x) / CANVAS_SCALE
+    dy = (event.y - CANVAS.drag_start_y) / CANVAS_SCALE
 
     # Update the drag offset
     DRAG_OFFSET[0] += dx
     DRAG_OFFSET[1] += dy
 
     # Move the map
-    CANVAS.move("all", dx, dy)
     CANVAS.drag_start_x = event.x
     CANVAS.drag_start_y = event.y
 
-    print("Drag offset: " + str(DRAG_OFFSET[0]) + ", " + str(DRAG_OFFSET[1]))
+    # Refresh the canvas
+    refresh_canvas()
+
+def refresh_canvas():
+    """
+    Redraws the canvas
+    :return:
+    """
+    CANVAS.delete("transport_path")
+    CANVAS.delete("station_circle")
+    CANVAS.delete("station_text")
+
+    # Redraw the map details
+    draw_map_details()
+
+    # Redraw the stations
+    draw_stations(stations)
+
+    # Redraw paths
+    if PATH_DRAWING:
+        draw_transport_path(PATH_STATIONS, PATH_TYPE)
+
 
 
 def draw_map_details():
@@ -132,7 +153,7 @@ def draw_stations(stations):
     global map_color_scheme
 
     CANVAS.delete("station_circle")
-    CANVAS.delete("station_name")
+    CANVAS.delete("station_text")
 
     # Draw the stations
     for station in stations:
@@ -159,8 +180,8 @@ def draw_stations(stations):
         CANVAS.create_oval(x1, y1, x2, y2,
                            fill=color,
                            outline="black" if LIGHT_MODE else "white",
-                           width=5 * CANVAS_SCALE, tags=("station_circle", station.stationName, station.stationID))
-        print("Station: " + station.stationName + ", " + str(station.stationID))
+                           width=5 * CANVAS_SCALE, tags=("station_circle",
+                                                         station.stationName, station.stationID, station.transportType))
 
         # Set up the font
         font_size = int(12 * CANVAS_SCALE)
@@ -172,28 +193,59 @@ def draw_stations(stations):
                            (station.coordinateY + DRAG_OFFSET[1]) * CANVAS_SCALE + 20 * CANVAS_SCALE,
                            text=station.stationName,
                            font=font, fill=font_color,
-                           tags=("station_text", station.stationName, station.stationID))
+                           tags=("station_text", station.stationName, station.stationID, station.transportType))
 
 
-def output_debug_data():
-    print("CANVAS_SCALE: " + str(CANVAS_SCALE))
-    print("DRAG_OFFSET: " + str(DRAG_OFFSET))
-
-
-def draw_transport_path(stations_selected):
+def draw_transport_path(stations_selected, type):
     """
     Highlights stations and draw the path between them
     :param stations_selected:
     :return:
     """
+    global PATH_DRAWING
+    global PATH_TYPE
+    global PATH_STATIONS
 
-    # Print the stations
-    for station in stations_selected:
-        print(station.stationName)
+    # Set the path drawing variables
+    PATH_DRAWING = True
+    PATH_TYPE = type
+    PATH_STATIONS = stations_selected
 
-    # Find stations with the same ID
-    for station in stations_selected:
-        print("Station ID: " + str(station.stationID))
-        station_circle = CANVAS.find_withtag(station.stationName)[0]
-        station_text = CANVAS.find_withtag(station.stationName)[1]
-        CANVAS.itemconfig(station_circle, fill="yellow")
+    # Delete previous path and clear the highlight
+    CANVAS.delete("transport_path")
+
+    # Draw the path between the stations
+    for i in range(len(stations_selected) - 1):
+        station1 = stations_selected[i]
+        station2 = stations_selected[i + 1]
+
+        # Get the coordinates of the stations
+        x1 = (station1.coordinateX + DRAG_OFFSET[0]) * CANVAS_SCALE
+        y1 = (station1.coordinateY + DRAG_OFFSET[1]) * CANVAS_SCALE
+        x2 = (station2.coordinateX + DRAG_OFFSET[0]) * CANVAS_SCALE
+        y2 = (station2.coordinateY + DRAG_OFFSET[1]) * CANVAS_SCALE
+
+        # Draw the line between the stations
+        if type == 0:
+            CANVAS.create_line(x1, y1, x2, y2,
+                               fill=map_color_scheme.get(
+                                   "colorLightBusStation") if LIGHT_MODE else map_color_scheme.get(
+                                   "colorDarkBusStation"),
+                               width=5 * CANVAS_SCALE,
+                               tags=("transport_path", station1.stationName, station2.stationName))
+        elif type == 1:
+            CANVAS.create_line(x1, y1, x2, y2,
+                               fill=map_color_scheme.get(
+                                   "colorLightTramStation") if LIGHT_MODE else map_color_scheme.get(
+                                   "colorDarkTramStation"),
+                               width=5 * CANVAS_SCALE,
+                               tags=("transport_path", station1.stationName, station2.stationName))
+        elif type == 2:
+            CANVAS.create_line(x1, y1, x2, y2,
+                               fill=map_color_scheme.get(
+                                   "colorLightTrainStation") if LIGHT_MODE else map_color_scheme.get(
+                                   "colorDarkTrainStation"),
+                               width=5 * CANVAS_SCALE,
+                               tags=("transport_path", station1.stationName, station2.stationName))
+        # Move the path to the back
+        CANVAS.tag_lower("transport_path")

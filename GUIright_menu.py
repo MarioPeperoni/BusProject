@@ -29,8 +29,20 @@ def create_right_menu(root):
                                         command=GUIform_create_transport.create_window)
     create_transport_button.pack()
 
+    # Declare variable for transport type
+    GUIform_create_transport.transportType = tk.IntVar(value=1)
+    # Create radio buttons for transport types
+    transportType_bus = tk.Radiobutton(menu_right, text="Bus", variable=GUIform_create_transport.transportType, value=1)
+    transportType_bus.pack()
+    transportType_tram = tk.Radiobutton(menu_right, text="Tram", variable=GUIform_create_transport.transportType,
+                                        value=2)
+    transportType_tram.pack()
+    transportType_train = tk.Radiobutton(menu_right, text="Train", variable=GUIform_create_transport.transportType,
+                                         value=3)
+    transportType_train.pack()
+
     # Create listbox for displaying all connections
-    create_listbox(menu_right)
+    create_listbox(menu_right).pack(pady=10, side=tk.TOP, fill=tk.BOTH, expand=True)
 
     return menu_right
 
@@ -55,8 +67,6 @@ def create_listbox(root):
     # Iterate over the transport objects and insert their names into the Listbox
     for transport in transport_objects:
         transport_listbox.insert(tk.END, "#" + str(transport.number) + " " + transport.name)
-
-    transport_listbox.pack(pady=10)
 
     # Bind buttons to listbox
     transport_listbox.bind("<Button-3>", show_context_menu)
@@ -95,7 +105,7 @@ def transport_highlight_path(event):
     selected_transport = transport_objects[selected_index]
 
     # Print selected transport path
-    GUImap_canvas.draw_transport_path(selected_transport.stops)
+    GUImap_canvas.draw_transport_path(selected_transport.stops, 0)
 
 
 def show_context_menu(event):
