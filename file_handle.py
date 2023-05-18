@@ -1,9 +1,16 @@
 import json
+from datetime import datetime
 from typing import List
 
+import classes.Class_map_color as map_color
 from classes.Class_station import Station
 from classes.Class_transport_object import TransportObject
 from classes.Class_map_detail import MapDetail
+from classes.Class_city import City
+from classes.Class_city_load_data import city_load_data
+
+PROGRAM_VERSION = "0.1.0"
+CITY_PATH = "data/city.json"
 
 cityName = ""
 map_color_scheme = None
@@ -29,8 +36,9 @@ def write_new_transport_path(transportType, number, name, stops, departureTimes)
     :return:
     """
 
-    with open("data/city.json", "r") as file:
+    with open(CITY_PATH, "r") as file:
         data = json.load(file)
+    file.close()
 
     # Get the list of stations
     stops = [stop.to_dict() for stop in stops]
@@ -48,8 +56,9 @@ def write_new_transport_path(transportType, number, name, stops, departureTimes)
     data[0]["transport_objects"].append(new_entry)
 
     # Save the data
-    with open("data/city.json", "w") as file:
+    with open(CITY_PATH, "w") as file:
         json.dump(data, file, indent=4)
+    file.close()
 
     # Reload the city
     load_city()
@@ -61,8 +70,9 @@ def write_new_station(station):
     :param station: station to be added
     """
 
-    with open("data/city.json", "r") as file:
+    with open(CITY_PATH, "r") as file:
         data = json.load(file)
+    file.close()
 
     # Get the list of stations
     stations = data[0]["stations"]
@@ -74,20 +84,26 @@ def write_new_station(station):
     data[0]["stations"] = stations
 
     # Save the data
-    with open("data/city.json", "w") as file:
+    with open(CITY_PATH, "w") as file:
         json.dump(data, file, indent=4)
+    file.close()
 
     # Reload the city
     load_city()
 
 
-def load_city():
+def load_city(change_file_path = None):
     """
     Loads the city from a JSON file
     """
+    global CITY_PATH
+
+    # Check if file path is provided
+    if change_file_path is not None:
+        CITY_PATH = change_file_path
 
     # Load the city from a JSON file
-    data = json.loads(open('data/city.json').read())
+    data = json.loads(open(CITY_PATH).read())
 
     global cityName
     global stations
@@ -114,3 +130,44 @@ def load_city():
     tram_objects = [transport for transport in transport_objects if transport.transportType == 1]
     train_objects = [transport for transport in transport_objects if transport.transportType == 2]
     metro_objects = [transport for transport in transport_objects if transport.transportType == 3]
+
+
+def create_empty_city(name, map_color_scheme=map_color.MapColorSchemeDefault):
+    """
+    Creates new empty city
+    :param name: name of the city
+    :param map_color_scheme: color scheme of the map
+    :return:
+    """
+    global CITY_PATH
+
+    # Set the path to the city file
+    CITY_PATH = "data/cities/" + name + ".json"
+
+    # Create a new city with empty lists
+    new_city_city = City(name, [], [], [], map_color_scheme)
+
+    # Create city load data
+    new_city_entry = city_load_data(PROGRAM_VERSION, name, CITY_PATH, str(datetime.now()), False)
+
+    # Save the city to a JSON file
+    with open(CITY_PATH, "w") as file:
+        json.dump([new_city_city.to_dict()], file, indent=4)
+    file.close()
+
+    # Save the city load data to a JSON file
+    # Load the city load data from a JSON file
+    try:
+        with open("data/city_load_data.json", "r") as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        data = []
+    file.close()
+
+    # Add the new city load data to the list
+    data.append(new_city_entry.to_dict())
+
+    # Save the data
+    with open("data/city_load_data.json", "w") as file:
+        json.dump(data, file, indent=4)
+    file.close()

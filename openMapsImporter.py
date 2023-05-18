@@ -215,7 +215,7 @@ def create_city(city_name, left, bottom, right, top, size=2000, map_color_scheme
     }
 
     # Save the city to a JSON file
-    with open("data/city.json", "w") as file:
+    with open("data/cities/" + city_name + ".json", "w") as file:
         json.dump([city], file, indent=4)
 
     # Print a message
