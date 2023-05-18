@@ -38,14 +38,19 @@ def create_window():
     # Create selection for transport type
     transportType_label = tk.Label(form, text="Transport Type:")
     transportType_label.grid(row=0, column=0, sticky="w")
+
+    # Create frame for transport type
+    transportType_frame = tk.Frame(form)
+    transportType_frame.grid(row=0, column=1, sticky="w")
+
     # Create radio buttons for transport types
-    transportType_bus = tk.Radiobutton(form, text="Bus", variable=transportType, value=TransportType.Bus.value)
+    transportType_bus = tk.Radiobutton(transportType_frame, text="Bus", variable=transportType, value=TransportType.Bus.value)
     transportType_bus.grid(row=0, column=1, sticky="w")
-    transportType_tram = tk.Radiobutton(form, text="Tram", variable=transportType, value=TransportType.Tram.value)
+    transportType_tram = tk.Radiobutton(transportType_frame, text="Tram", variable=transportType, value=TransportType.Tram.value)
     transportType_tram.grid(row=0, column=2, sticky="w")
-    transportType_train = tk.Radiobutton(form, text="Train", variable=transportType, value=TransportType.Train.value)
+    transportType_train = tk.Radiobutton(transportType_frame, text="Train", variable=transportType, value=TransportType.Train.value)
     transportType_train.grid(row=0, column=3, sticky="w")
-    transportType_metro = tk.Radiobutton(form, text="Metro", variable=transportType, value=TransportType.Metro.value)
+    transportType_metro = tk.Radiobutton(transportType_frame, text="Metro", variable=transportType, value=TransportType.Metro.value)
     transportType_metro.grid(row=0, column=4, sticky="w")
 
     def check_for_number(entry):
@@ -189,8 +194,8 @@ def create_window():
         # Convert stops to station objects
         stops_object = Station.get_stations_by_names(stops, stations)
         # Add new transport entry to json file
-        file_handle.add_new_transport_entry_to_json(transportType.get(), int(number.get()), name.get(), stops_object,
-                                                    departureTimes)
+        file_handle.write_new_transport_path(transportType.get(), int(number.get()), name.get(), stops_object,
+                                             departureTimes)
 
         # Refresh the transport paths
         newTransportEntry = TransportObject(

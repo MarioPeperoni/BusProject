@@ -1,5 +1,7 @@
 from tkinter import Canvas
 
+import GUIform_create_station
+
 from file_handle import stations
 from file_handle import map_details
 from file_handle import map_color_scheme
@@ -12,6 +14,8 @@ MAX_ZOOM = 2
 CANVAS_SCALE = 1
 DRAG_OFFSET = [0, 0]
 LIGHT_MODE = False
+MOUSE_X = 0
+MOUSE_Y = 0
 
 # Path drawing variables
 PATH_DRAWING = False
@@ -33,6 +37,8 @@ def create_canvas(tk):
     CANVAS.bind("<MouseWheel>", zoom)
     CANVAS.bind("<ButtonPress-1>", start_drag)
     CANVAS.bind("<B1-Motion>", drag)
+    CANVAS.bind("<Button-2>", lambda event: GUIform_create_station.create_window(MOUSE_X, MOUSE_Y))
+    CANVAS.bind("<Motion>", get_mouse_coordinates)
 
     # Set the background color
     CANVAS.configure(bg=map_color_scheme.get("colorLightBG") if LIGHT_MODE else map_color_scheme.get("colorDarkBG"))
@@ -105,6 +111,44 @@ def drag(event):
     CANVAS.drag_start_y = event.y
 
     # Refresh the canvas
+    refresh_canvas()
+
+
+def get_mouse_coordinates(event):
+    """
+    Gets the mouse coordinates
+    :param event:
+    :return:
+    """
+    global MOUSE_X
+    global MOUSE_Y
+
+    MOUSE_X = (event.x - DRAG_OFFSET[0]) / CANVAS_SCALE
+    MOUSE_Y = (event.y - DRAG_OFFSET[1]) / CANVAS_SCALE
+
+    CANVAS.delete("cursor_pos")
+    CANVAS.create_text(10, CANVAS.winfo_height() - 10, anchor="sw", text="X: " + str(MOUSE_X) + " Y: " + str(MOUSE_Y),
+                       tags="cursor_pos")
+
+
+def refresh_stations(station, mode="add"):
+    """
+    Refreshes the stations on the map
+    :param station: station structure or station id for removal
+    :param mode: mode (add)
+    :return:
+    """
+    global stations
+
+    # Mode switch
+    if mode == "add":
+        # Add the station to the list
+        stations.append(station)
+    elif mode == "remove":
+        # Remove the station by sorting the list
+        stations = [x for x in stations if x.id != station]
+
+    # Redraw the stations
     refresh_canvas()
 
 

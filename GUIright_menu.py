@@ -1,5 +1,4 @@
 import tkinter as tk
-import importlib
 
 import GUIform_create_transport
 import GUImap_canvas
@@ -158,13 +157,3 @@ def show_context_menu(event):
         context_menu.tk_popup(event.x_root, event.y_root)
     finally:
         context_menu.grab_release()
-
-
-def reload_variables(modules):
-    """
-    Reloads all variables from modules
-    :param modules: list of modules to reload
-    :return:
-    """
-    for module in modules:
-        importlib.reload(module)

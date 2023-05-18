@@ -18,7 +18,7 @@ train_objects: list[TransportObject] = []
 metro_objects: list[TransportObject] = []
 
 
-def add_new_transport_entry_to_json(transportType, number, name, stops, departureTimes):
+def write_new_transport_path(transportType, number, name, stops, departureTimes):
     """
     Adds a new transport entry to the JSON file
     :param transportType: type of transport
@@ -46,6 +46,32 @@ def add_new_transport_entry_to_json(transportType, number, name, stops, departur
 
     # Add the new entry to the data
     data[0]["transport_objects"].append(new_entry)
+
+    # Save the data
+    with open("data/city.json", "w") as file:
+        json.dump(data, file, indent=4)
+
+    # Reload the city
+    load_city()
+
+
+def write_new_station(station):
+    """
+    Adds a new station to the JSON file and reloads the city
+    :param station: station to be added
+    """
+
+    with open("data/city.json", "r") as file:
+        data = json.load(file)
+
+    # Get the list of stations
+    stations = data[0]["stations"]
+
+    # Add the new station to the list
+    stations.append(station.to_dict())
+
+    # Add the new list to the data
+    data[0]["stations"] = stations
 
     # Save the data
     with open("data/city.json", "w") as file:
