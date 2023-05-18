@@ -1,10 +1,17 @@
+from datetime import datetime
+
 import requests
 import json
 
 import xml.etree.ElementTree as ET
 
 import classes.Class_map_color as map_color
+import file_handle
+from classes.Class_city_load_data import city_load_data
 from classes.Class_station import Station
+from file_handle import PROGRAM_VERSION
+
+CITY_PATH = ""
 
 config = {
     'left': 0,
@@ -15,6 +22,25 @@ config = {
     'offset_x': 0,
     'offset_y': 0,
 }
+
+
+def import_area_big(left, bottom, right, top, map_size=2000):
+    """
+    Splits the area into smaller chunks for importing size 0.01
+    :param left: left longitude
+    :param bottom: bottom latitude
+    :param right: right longitude
+    :param top: top latitude
+    :return:
+    """
+    # Calculate the number of chunks
+    chunks_x = int((right - left) / 0.0001)
+    chunks_y = int((top - bottom) / 0.0001)
+
+    # Import the chunks
+    for x in range(chunks_x):
+        for y in range(chunks_y):
+            import_area(left + x * 0.01, bottom + y * 0.01, left + (x + 1) * 0.01, bottom + (y + 1) * 0.01, map_size)
 
 
 def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0):
@@ -146,8 +172,8 @@ def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0)
 
         # Check for subway station
         if node.find("tag[@k='subway']") is not None \
-            and node.find("tag[@k='subway']").get('v') == 'yes' \
-            and node.find("tag[@k='public_transport']").get('v') == 'stop_position':
+                and node.find("tag[@k='subway']").get('v') == 'yes' \
+                and node.find("tag[@k='public_transport']").get('v') == 'stop_position':
 
             # Check if the station is already in the list
             name = node.find("tag[@k='name']").get('v')
@@ -182,10 +208,17 @@ def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0)
         json.dump(stations, file, indent=4)
 
 
-def create_city(city_name, left, bottom, right, top, size=2000, map_color_scheme=map_color.MapColorSchemeDefault):
+def create_city(city_name,
+                left, bottom, right, top,
+                size=2000,
+                big=False,
+                map_color_scheme=map_color.MapColorSchemeDefault):
     """
     Creates a new city
     """
+
+    global CITY_PATH
+    CITY_PATH = "data/cities/" + city_name + ".json"
 
     print("Creating a new city " + city_name + " with coordinates: "
           + str(left) + ", " + str(bottom) + ", " + str(right) + ", " + str(top) + "...")
@@ -199,7 +232,10 @@ def create_city(city_name, left, bottom, right, top, size=2000, map_color_scheme
         file.write('[]')
 
     # Import area
-    import_area(left, bottom, right, top, size)
+    if big:
+        import_area_big(left, bottom, right, top, size)
+    else:
+        import_area(left, bottom, right, top, size)
 
     # Load stations from JSON file
     with open('data/stations.json', 'r') as file:
@@ -217,6 +253,28 @@ def create_city(city_name, left, bottom, right, top, size=2000, map_color_scheme
     # Save the city to a JSON file
     with open("data/cities/" + city_name + ".json", "w") as file:
         json.dump([city], file, indent=4)
+    file.close()
+
+    # Create city entry
+    new_city_entry = city_load_data(PROGRAM_VERSION, city_name, CITY_PATH, str(datetime.now()), True)
+
+    # Add city entry to the list
+    try:
+        with open("data/city_load_data.json", "r") as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        data = []
+    file.close()
+
+    # Add new city entry to the list
+    data.append(new_city_entry.to_dict())
+
+    # Save the data
+    with open("data/city_load_data.json", "w") as file:
+        json.dump(data, file, indent=4)
+    file.close()
+
+    file_handle.change_path(CITY_PATH)
 
     # Print a message
     print(f'City {city_name} created successfully!')

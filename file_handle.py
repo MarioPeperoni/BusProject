@@ -92,7 +92,7 @@ def write_new_station(station):
     load_city()
 
 
-def load_city(change_file_path = None):
+def load_city(change_file_path=None):
     """
     Loads the city from a JSON file
     """
@@ -171,3 +171,8 @@ def create_empty_city(name, map_color_scheme=map_color.MapColorSchemeDefault):
     with open("data/city_load_data.json", "w") as file:
         json.dump(data, file, indent=4)
     file.close()
+
+
+def change_path(path):
+    global CITY_PATH
+    CITY_PATH = path

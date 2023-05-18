@@ -2,6 +2,7 @@ import json
 import tkinter as tk
 
 import file_handle
+import openMapsImporter
 
 WINDOW = tk.Tk()
 
@@ -145,25 +146,25 @@ def create_new_map_from_coordinates_window():
     coordinates_frame.grid(row=2, column=0, columnspan=2)
 
     # Create entry for up coordinate
-    up_coordinate_entry = tk.Entry(coordinates_frame, width=4)
+    up_coordinate_entry = tk.Entry(coordinates_frame, width=7)
     up_coordinate_entry.grid(row=0, column=3)
     up_coordinate_label = tk.Label(coordinates_frame, text="⬆️")
     up_coordinate_label.grid(row=1, column=3)
 
     # Create entry for down coordinate
-    down_coordinate_entry = tk.Entry(coordinates_frame, width=4)
+    down_coordinate_entry = tk.Entry(coordinates_frame, width=7)
     down_coordinate_entry.grid(row=4, column=3)
     down_coordinate_label = tk.Label(coordinates_frame, text="⬇️")
     down_coordinate_label.grid(row=3, column=3)
 
     # Create entry for left coordinate
-    left_coordinate_entry = tk.Entry(coordinates_frame, width=4)
+    left_coordinate_entry = tk.Entry(coordinates_frame, width=7)
     left_coordinate_entry.grid(row=2, column=1)
     left_coordinate_label = tk.Label(coordinates_frame, text="⬅️")
     left_coordinate_label.grid(row=2, column=2)
 
     # Create entry for right coordinate
-    right_coordinate_entry = tk.Entry(coordinates_frame, width=4)
+    right_coordinate_entry = tk.Entry(coordinates_frame, width=7)
     right_coordinate_entry.grid(row=2, column=5)
     right_coordinate_label = tk.Label(coordinates_frame, text="➡️")
     right_coordinate_label.grid(row=2, column=4)
@@ -174,7 +175,19 @@ def create_new_map_from_coordinates_window():
     ok_button.grid(row=3, column=0, columnspan=2, pady=5)
 
     def ok_button_clicked():
-        pass
+        # Import city from coordinates
+        openMapsImporter.create_city(map_name_entry.get(),
+                                     float(left_coordinate_entry.get()), float(down_coordinate_entry.get()),
+                                     float(right_coordinate_entry.get()), float(up_coordinate_entry.get()),
+                                     1000, False)
+        # Load city
+        file_handle.load_city()
+
+        # Close window
+        window_new_map.destroy()
+
+        # Load close init window and start main program
+        load_main_program()
 
 
 def load_main_program():
