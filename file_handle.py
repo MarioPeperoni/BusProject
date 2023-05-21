@@ -92,6 +92,66 @@ def write_new_station(station):
     load_city()
 
 
+def delete_station(station):
+    """
+    Deletes a station from the JSON file and reloads the city
+    :param station: station to be deleted
+    """
+
+    with open(CITY_PATH, "r") as file:
+        data = json.load(file)
+    file.close()
+
+    # Get the list of stations
+    stations = data[0]["stations"]
+
+    # Remove the station from the list
+    stations.remove(station.to_dict())
+
+    # Add the new list to the data
+    data[0]["stations"] = stations
+
+    # Save the data
+    with open(CITY_PATH, "w") as file:
+        json.dump(data, file, indent=4)
+    file.close()
+
+    print("Station deleted from database")
+
+    # Reload the city
+    load_city()
+
+
+def delete_transport_object(transport_object):
+    """
+    Deletes a transport object from the JSON file and reloads the city
+    :param transport_object:
+    :return:
+    """
+    with open(CITY_PATH, "r") as file:
+        data = json.load(file)
+    file.close()
+
+    # Get the list of transport objects
+    transport_objects = data[0]["transport_objects"]
+
+    # Remove the transport object from the list
+    transport_objects.remove(transport_object.to_dict())
+
+    # Add the new list to the data
+    data[0]["transport_objects"] = transport_objects
+
+    # Save the data
+    with open(CITY_PATH, "w") as file:
+        json.dump(data, file, indent=4)
+    file.close()
+
+    print("Transport object deleted from database")
+
+    # Reload the city
+    load_city()
+
+
 def load_city(change_file_path=None):
     """
     Loads the city from a JSON file
@@ -176,3 +236,15 @@ def create_empty_city(name, map_color_scheme=map_color.MapColorSchemeDefault):
 def change_path(path):
     global CITY_PATH
     CITY_PATH = path
+
+
+def get_station_by_id(station_id):
+    """
+    Gets the station object by the station ID
+    :param station_id:
+    :return:
+    """
+    for station in stations:
+        if station.stationID == station_id:
+            return station
+    return None

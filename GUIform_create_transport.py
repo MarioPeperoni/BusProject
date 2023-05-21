@@ -116,7 +116,7 @@ def create_window():
 
     # Create a listbox for selected stations
     selectedStops_listbox = tk.Listbox(form, height=len(stops))
-    selectedStops_listbox.grid(row=5, column=1)
+    selectedStops_listbox.grid(row=5, column=1, sticky="w")
 
     # Create a separator
     seperator2 = ttk.Separator(form, orient="horizontal")
@@ -175,7 +175,7 @@ def create_window():
 
     # Create a listbox for inputted times
     inserted_departureTime_listbox = tk.Listbox(form, height=len(departureTimes))
-    inserted_departureTime_listbox.grid(row=9, column=1)
+    inserted_departureTime_listbox.grid(row=9, column=1, sticky="w")
 
     # Create a separator
     seperator3 = ttk.Separator(form, orient="horizontal")
@@ -208,6 +208,3 @@ def create_window():
     # Create a button to add new transport entry
     submit_button = tk.Button(form, text="Add new entry", command=submit_form)
     submit_button.grid(row=11, column=0, columnspan=4)
-
-    # Start the main loop
-    form.mainloop()

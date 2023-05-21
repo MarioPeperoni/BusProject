@@ -74,21 +74,14 @@ def option_select(event):
 
     # Check if existing map is selected
     else:
-        # Get the selected map name
-        selected_map_name = MAP_LISTBOX.get(MAP_LISTBOX.curselection()[0])
-
-        # Remove the "#" and the number from the beginning of the string
-        selected_map_name = selected_map_name.split(" ", 1)[1]
-
         # Load json file with all the cities
         with open("data/city_load_data.json", "r") as file:
             data = json.load(file)
         file.close()
 
         # Get city path by subtracting 2 from the index
-        selected_map_name = data[MAP_LISTBOX.curselection()[0] - 2]["file_path"]
-        file_handle.load_city(selected_map_name)
-        file.close()
+        selected_map_path = data[MAP_LISTBOX.curselection()[0] - 2]["file_path"]
+        file_handle.load_city(selected_map_path)
         load_main_program()
 
 
@@ -113,6 +106,9 @@ def create_new_map_window():
     ok_button.grid(row=1, column=0, columnspan=2, pady=5)
 
     def ok_button_clicked():
+        # Close window
+        window_new_map.destroy()
+
         # Create empty city
         file_handle.create_empty_city(map_name_entry.get())
 

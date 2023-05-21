@@ -1,6 +1,7 @@
 from tkinter import Canvas
 
 import GUIform_create_station
+import GUIStation_menu
 
 from file_handle import stations
 from file_handle import map_details
@@ -39,6 +40,7 @@ def create_canvas(tk):
     CANVAS.bind("<B1-Motion>", drag)
     CANVAS.bind("<Button-2>", lambda event: GUIform_create_station.create_window(MOUSE_X, MOUSE_Y))
     CANVAS.bind("<Motion>", get_mouse_coordinates)
+    CANVAS.tag_bind("station_circle", "<Button-1>", station_clicked)
 
     # Set the background color
     CANVAS.configure(bg=map_color_scheme.get("colorLightBG") if LIGHT_MODE else map_color_scheme.get("colorDarkBG"))
@@ -126,6 +128,10 @@ def get_mouse_coordinates(event):
     MOUSE_X = (event.x - DRAG_OFFSET[0]) / CANVAS_SCALE
     MOUSE_Y = (event.y - DRAG_OFFSET[1]) / CANVAS_SCALE
 
+    # Round the coordinates
+    MOUSE_X = round(MOUSE_X, 2)
+    MOUSE_Y = round(MOUSE_Y, 2)
+
     CANVAS.delete("cursor_pos")
     CANVAS.create_text(10, CANVAS.winfo_height() - 10, anchor="sw", text="X: " + str(MOUSE_X) + " Y: " + str(MOUSE_Y),
                        tags="cursor_pos")
@@ -134,7 +140,7 @@ def get_mouse_coordinates(event):
 def refresh_stations(station, mode="add"):
     """
     Refreshes the stations on the map
-    :param station: station structure or station id for removal
+    :param station: station structure
     :param mode: mode (add)
     :return:
     """
@@ -145,8 +151,14 @@ def refresh_stations(station, mode="add"):
         # Add the station to the list
         stations.append(station)
     elif mode == "remove":
-        # Remove the station by sorting the list
-        stations = [x for x in stations if x.id != station]
+        # Remove the station from the list
+        try:
+            stations.remove(station)
+        except ValueError:
+            # If value error try to delete the station by id (it happens if station has been added in this session)
+            for s in stations:
+                if s.stationID == station.stationID:
+                    stations.remove(s)
 
     # Redraw the stations
     refresh_canvas()
@@ -295,3 +307,22 @@ def draw_transport_path(stations_selected, type, custom_color=None):
                            tags=("transport_path", station1.stationName, station2.stationName))
         # Move the path to the back
         CANVAS.tag_lower("transport_path")
+
+
+def station_clicked(event):
+    """
+    Handles the station click event
+    :return:
+    """
+    # Get the station clicked
+    station = CANVAS.find_closest(event.x, event.y)[0]
+
+    # Get the station ID
+    id = CANVAS.gettags(station)[2]
+
+    # Get the station object
+    station = file_handle.get_station_by_id(id)
+
+    # Open menu window
+    GUIStation_menu.create_station_menu(station)
+    print(station.stationName, station.stationID, station.transportType)

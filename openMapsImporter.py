@@ -85,7 +85,6 @@ def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0)
     # Declare variables
     stations_list = []
     seen_stations = set()
-    map_size = 2000
 
     def scale(axis, value):
         """
@@ -227,10 +226,6 @@ def create_city(city_name,
     with open('data/stations.json', 'w') as file:
         file.write('[]')
 
-    # Clear city.json file
-    with open('data/city.json', 'w') as file:
-        file.write('[]')
-
     # Import area
     if big:
         import_area_big(left, bottom, right, top, size)
@@ -251,7 +246,7 @@ def create_city(city_name,
     }
 
     # Save the city to a JSON file
-    with open("data/cities/" + city_name + ".json", "w") as file:
+    with open(CITY_PATH, "w") as file:
         json.dump([city], file, indent=4)
     file.close()
 

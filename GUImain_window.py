@@ -10,7 +10,7 @@ def create_main_window():
     :return:
     """
     # Create the main window
-    window = tk.Tk()
+    window = tk.Toplevel()
     window.geometry("980x600")
     window.title("Bus Project")
 
@@ -19,5 +19,3 @@ def create_main_window():
 
     # Create right side frame
     GUIright_menu.create_right_menu(window).pack(side="right", pady=5, padx=10)
-
-    window.mainloop()
