@@ -15,6 +15,8 @@ def create_window():
     global WINDOW
     WINDOW.title("Bus Project Setup")
     WINDOW.resizable(False, False)
+    WINDOW.iconbitmap("data/icon/icon.ico")
+    WINDOW.iconphoto(True, tk.PhotoImage(file="data/icon/icon.png"))
     WINDOW.bind("<<ListboxSelect>>", option_select)
 
     # Create title label
