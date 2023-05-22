@@ -108,14 +108,14 @@ def create_new_map_window():
     ok_button.grid(row=1, column=0, columnspan=2, pady=5)
 
     def ok_button_clicked():
-        # Close window
-        window_new_map.destroy()
-
         # Create empty city
         file_handle.create_empty_city(map_name_entry.get())
 
         # Load city
         file_handle.load_city()
+
+        # Close window
+        window_new_map.destroy()
 
         # Load close init window and start main program
         load_main_program()
