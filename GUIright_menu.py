@@ -4,6 +4,7 @@ from tkinter import messagebox
 import GUIform_create_transport
 import GUImap_canvas
 import file_handle
+import simulation_engine
 
 from file_handle import transport_objects
 from file_handle import cityName
@@ -54,6 +55,17 @@ def create_right_menu(root):
     transportType_metro = tk.Radiobutton(MENU_RIGHT, text="Metro", variable=TRANSPORT_TYPE_RADIO_SELECTION,
                                          value=3, command=refresh_transport_paths)
     transportType_metro.pack()
+
+    # Create button for starting the simulation
+    start_simulation_button = tk.Button(MENU_RIGHT, text="Start simulation",
+                                        command=lambda: simulation_engine.start_simulation(
+                                            get_selected_transport_object()))
+    start_simulation_button.pack()
+
+    # Create button for stopping the simulation
+    stop_simulation_button = tk.Button(MENU_RIGHT, text="Stop simulation",
+                                       command=lambda: simulation_engine.stop_simulation())
+    stop_simulation_button.pack()
 
     # Create listbox for displaying all connections
     create_listbox(MENU_RIGHT).pack(pady=10, side=tk.TOP, fill=tk.BOTH, expand=True)
@@ -121,12 +133,7 @@ def refresh_transport_paths(newTransportObject=None):
     TRANSPORT_LISTBOX.update()
 
 
-def transport_highlight_path(event):
-    """
-    Highlights the selected transport path on the map
-    :return:
-    """
-
+def get_selected_transport_object():
     # Get selected transport object
     if TRANSPORT_TYPE_RADIO_SELECTION.get() == 0:
         selected_transport = bus_objects[TRANSPORT_LISTBOX.curselection()[0]]
@@ -136,6 +143,20 @@ def transport_highlight_path(event):
         selected_transport = train_objects[TRANSPORT_LISTBOX.curselection()[0]]
     elif TRANSPORT_TYPE_RADIO_SELECTION.get() == 3:
         selected_transport = metro_objects[TRANSPORT_LISTBOX.curselection()[0]]
+
+    return selected_transport
+
+
+def transport_highlight_path(event):
+    """
+    Highlights the selected transport path on the map
+    :return:
+    """
+
+    selected_transport = get_selected_transport_object()
+
+    # Cancel any running simulation
+    simulation_engine.stop_simulation()
 
     # Draw selected transport path
     GUImap_canvas.draw_transport_path(selected_transport.stops, TRANSPORT_TYPE_RADIO_SELECTION.get())

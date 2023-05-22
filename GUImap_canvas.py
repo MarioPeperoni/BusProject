@@ -23,6 +23,14 @@ PATH_DRAWING = False
 PATH_STATIONS = []
 PATH_TYPE = 0
 
+# Simulation variables
+SIMULATION_RUNNING = False
+VEHICLE_LAST_X = 0
+VEHICLE_LAST_Y = 0
+VEHICLE_LAST_SIZE = 0
+VEHICLE_LAST_TRANSPORT_TYPE = 0
+VEHICLE_LAST_ANGLE = 0
+
 
 def create_canvas(tk):
     """
@@ -172,6 +180,7 @@ def refresh_canvas():
     CANVAS.delete("transport_path")
     CANVAS.delete("station_circle")
     CANVAS.delete("station_text")
+    CANVAS.delete("sim_vehicle")
 
     # Redraw the map details
     draw_map_details()
@@ -182,6 +191,9 @@ def refresh_canvas():
     # Redraw paths
     if PATH_DRAWING:
         draw_transport_path(PATH_STATIONS, PATH_TYPE)
+
+    if SIMULATION_RUNNING:
+        draw_vehicle(VEHICLE_LAST_X, VEHICLE_LAST_Y, VEHICLE_LAST_SIZE, VEHICLE_LAST_TRANSPORT_TYPE, VEHICLE_LAST_ANGLE)
 
 
 def draw_map_details():
@@ -326,3 +338,55 @@ def station_clicked(event):
     # Open menu window
     GUIStation_menu.create_station_menu(station)
     print(station.stationName, station.stationID, station.transportType)
+
+
+def draw_vehicle(x, y, size, transport_type, angle, custom_color=None):
+    global SIMULATION_RUNNING, \
+        VEHICLE_LAST_X, VEHICLE_LAST_Y, VEHICLE_LAST_SIZE, VEHICLE_LAST_TRANSPORT_TYPE, VEHICLE_LAST_ANGLE
+
+    # Set the simulation running variable
+    SIMULATION_RUNNING = True
+
+    # Delete previous vehicle
+    CANVAS.delete("sim_vehicle")
+
+    # Save the last variables
+    VEHICLE_LAST_X = x
+    VEHICLE_LAST_Y = y
+    VEHICLE_LAST_SIZE = size
+    VEHICLE_LAST_TRANSPORT_TYPE = transport_type
+    VEHICLE_LAST_ANGLE = angle
+
+    # Calculate the size
+    size = size * CANVAS_SCALE
+
+    # Apply the drag offset and scale
+    x = (x + DRAG_OFFSET[0]) * CANVAS_SCALE
+    y = (y + DRAG_OFFSET[1]) * CANVAS_SCALE
+
+    # Check for custom color
+    if custom_color is None:
+
+        # Set color based on transport type
+        if transport_type == 0:
+            vehicle_color = map_color_scheme.get("colorLightBusStation") \
+                if LIGHT_MODE else map_color_scheme.get("colorDarkBusStation")
+        elif transport_type == 1:
+            vehicle_color = map_color_scheme.get("colorLightTramStation") \
+                if LIGHT_MODE else map_color_scheme.get("colorDarkTramStation")
+        elif transport_type == 2:
+            vehicle_color = map_color_scheme.get("colorLightTrainStation") \
+                if LIGHT_MODE else map_color_scheme.get("colorDarkTrainStation")
+        elif transport_type == 3:
+            vehicle_color = map_color_scheme.get("colorLightMetroStation") \
+                if LIGHT_MODE else map_color_scheme.get("colorDarkMetroStation")
+    else:
+        # Set the color to the custom color
+        vehicle_color = custom_color
+
+    offset = 10 * CANVAS_SCALE
+    # Draw the rectangle
+    CANVAS.create_rectangle(x - offset, y - offset, x + size - offset, y + size - offset,
+                            fill=vehicle_color,
+                            outline="black" if LIGHT_MODE else "white",
+                            width=2 * CANVAS_SCALE, tags="sim_vehicle")
