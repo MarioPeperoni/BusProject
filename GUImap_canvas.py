@@ -1,3 +1,4 @@
+import math
 from tkinter import Canvas
 
 import GUIform_create_station
@@ -384,9 +385,28 @@ def draw_vehicle(x, y, size, transport_type, angle, custom_color=None):
         # Set the color to the custom color
         vehicle_color = custom_color
 
-    offset = 10 * CANVAS_SCALE
-    # Draw the rectangle
-    CANVAS.create_rectangle(x - offset, y - offset, x + size - offset, y + size - offset,
+    # Offset for rendering to the center vehicle
+    offset = 7 * CANVAS_SCALE
+
+    # Vertices of the vehicle
+    vertices = [
+        (x - offset, y - offset),
+        (x + size - offset, y - offset),
+        (x + size - offset, y + size/2 - offset),
+        (x - offset, y + size/2 - offset)
+    ]
+
+    # Rotate the polygon vertices
+    rotated_vertices = []
+    for vertex in vertices:
+        vertex_x, vertex_y = vertex
+        rotated_x = (vertex_x - x) * math.cos(angle) - (vertex_y - y) * math.sin(angle) + x
+        rotated_y = (vertex_x - x) * math.sin(angle) + (vertex_y - y) * math.cos(angle) + y
+        rotated_vertices.append((rotated_x, rotated_y))
+
+    CANVAS.create_polygon(*rotated_vertices,
                             fill=vehicle_color,
-                            outline="black" if LIGHT_MODE else "white",
                             width=2 * CANVAS_SCALE, tags="sim_vehicle")
+
+    # Move the vehicle to the back
+    CANVAS.tag_lower("sim_vehicle")
