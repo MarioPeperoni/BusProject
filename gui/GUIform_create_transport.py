@@ -265,6 +265,15 @@ def departure_times_frame():
     DEPARTURE_TIMES_LISTBOX.grid(row=8, column=1, columnspan=4, sticky="w")
 
 
+def time_to_seconds(time):
+    """
+    Converts a time in the format HH:MM to seconds
+    :param time: time in the format HH:MM
+    :return: time in seconds
+    """
+    return int(time.split(":")[0]) * 3600 + int(time.split(":")[1]) * 60
+
+
 def submit_form():
     """
     Adds a new transport entry to the json file and closes the form
@@ -281,6 +290,10 @@ def submit_form():
 
     # Convert stops names to station objects
     stops = Station.get_stations_by_names(STOPS_ADDED, stations)
+
+    # Convert times to seconds
+    for i in range(len(DEPARTURE_TIMES)):
+        DEPARTURE_TIMES[i] = time_to_seconds(DEPARTURE_TIMES[i])
 
     # Add new transport entry to json file
     file_handle.write_new_transport_path(TRANSPORT_TYPE.get(), int(NUMBER.get()), NAME.get(), stops, DEPARTURE_TIMES)
