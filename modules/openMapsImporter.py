@@ -76,11 +76,11 @@ def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0)
         exit(1)
 
     # Print response content to data.xml
-    with open('../data/data.xml', 'wb') as file:
+    with open('data/data.xml', 'wb') as file:
         file.write(response.content)
 
     # Parse the XML file containing the OpenStreetMap data
-    tree = ET.parse('../data/data.xml')
+    tree = ET.parse('data/data.xml')
     root = tree.getroot()
 
     # Declare variables
@@ -192,7 +192,7 @@ def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0)
 
     try:
         # Open json file with stations
-        with open('../data/stations.json', 'r') as file:
+        with open('data/stations.json', 'r') as file:
             stations = json.load(file)
     except FileNotFoundError:
         stations = []
@@ -204,7 +204,7 @@ def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0)
             print(f'Station {station.stationName} added to the list')
 
     # Save stations to json file
-    with open('../data/stations.json', 'w') as file:
+    with open('data/stations.json', 'w') as file:
         json.dump(stations, file, indent=4)
 
 
@@ -224,7 +224,7 @@ def create_city(city_name,
           + str(left) + ", " + str(bottom) + ", " + str(right) + ", " + str(top) + "...")
 
     # Clear stations.json file
-    with open('../data/stations.json', 'w') as file:
+    with open('data/stations.json', 'w') as file:
         file.write('[]')
 
     # Import area
@@ -234,7 +234,7 @@ def create_city(city_name,
         import_area(left, bottom, right, top, size)
 
     # Load stations from JSON file
-    with open('../data/stations.json', 'r') as file:
+    with open('data/stations.json', 'r') as file:
         stations = json.load(file)
 
     # Create a new city
@@ -256,7 +256,7 @@ def create_city(city_name,
 
     # Add city entry to the list
     try:
-        with open("../data/city_load_data.json", "r") as file:
+        with open("data/city_load_data.json", "r") as file:
             data = json.load(file)
     except FileNotFoundError:
         data = []
@@ -266,7 +266,7 @@ def create_city(city_name,
     data.append(new_city_entry.to_dict())
 
     # Save the data
-    with open("../data/city_load_data.json", "w") as file:
+    with open("data/city_load_data.json", "w") as file:
         json.dump(data, file, indent=4)
     file.close()
 
