@@ -1,6 +1,8 @@
 import math
 from tkinter import Canvas
 
+from classes import Class_path
+
 from gui import GUIform_create_station
 from gui import GUIStation_menu
 
@@ -22,9 +24,7 @@ MOUSE_Y = 0
 STATIONS = file_handle.stations
 
 # Path drawing variables
-PATH_DRAWING = False
-PATH_STATIONS = []
-PATH_TYPE = 0
+PATHS_DRAWN = []
 
 # Simulation variables
 LAST_SIMULATION_TIME = 0
@@ -196,12 +196,11 @@ def refresh_canvas():
     draw_stations(STATIONS)
 
     # Redraw paths
-    if PATH_DRAWING:
-        draw_transport_path(PATH_STATIONS, PATH_TYPE)
+    for path in PATHS_DRAWN:
+        draw_transport_path(path)
 
     # Draw the timer
     draw_timer_on_screen(LAST_SIMULATION_TIME)
-
 
 
 def draw_map_details():
@@ -271,29 +270,30 @@ def draw_stations(stations):
                            tags=("station_text", station.stationName, station.stationID, station.transportType))
 
 
-def draw_transport_path(stations_selected, type, custom_color=None):
+def draw_transport_path(path: Class_path, manual=False):
     """
     Highlights stations and draw the path between them
-    :param stations_selected:
+    :param path: path object
     :return:
     """
-    global PATH_DRAWING
-    global PATH_TYPE
-    global PATH_STATIONS
-    global COLOR
 
-    # Set the path drawing variables
-    PATH_DRAWING = True
-    PATH_TYPE = type
-    PATH_STATIONS = stations_selected
+    # Add the path to the list of drawn paths
+    if path not in PATHS_DRAWN:
+        PATHS_DRAWN.append(path)
+
+    # Check for manual selection
+    if manual:
+        PATHS_DRAWN.clear()
+        PATHS_DRAWN.append(path)
+        CANVAS.delete("transport_path")
 
     # Delete previous path and clear the highlight
-    CANVAS.delete("transport_path")
+    CANVAS.delete(path.ID)
 
     # Draw the path between the stations
-    for i in range(len(stations_selected) - 1):
-        station1 = stations_selected[i]
-        station2 = stations_selected[i + 1]
+    for i in range(len(path.stations) - 1):
+        station1 = path.stations[i]
+        station2 = path.stations[i + 1]
 
         # Get the coordinates of the stations
         x1 = (station1.coordinateX + DRAG_OFFSET[0]) * CANVAS_SCALE
@@ -302,31 +302,48 @@ def draw_transport_path(stations_selected, type, custom_color=None):
         y2 = (station2.coordinateY + DRAG_OFFSET[1]) * CANVAS_SCALE
 
         # Check for custom color
-        if custom_color is None:
+        if path.custom_color is None:
 
             # Set color based on transport type
-            if type == 0:
+            if path.transport_type == 0:
                 COLOR = map_color_scheme.get("colorLightBusStation") \
                     if LIGHT_MODE else map_color_scheme.get("colorDarkBusStation")
-            elif type == 1:
+            elif path.transport_type == 1:
                 COLOR = map_color_scheme.get("colorLightTramStation") \
                     if LIGHT_MODE else map_color_scheme.get("colorDarkTramStation")
-            elif type == 2:
+            elif path.transport_type == 2:
                 COLOR = map_color_scheme.get("colorLightTrainStation") \
                     if LIGHT_MODE else map_color_scheme.get("colorDarkTrainStation")
-            elif type == 3:
+            elif path.transport_type == 3:
                 COLOR = map_color_scheme.get("colorLightMetroStation") \
                     if LIGHT_MODE else map_color_scheme.get("colorDarkMetroStation")
         else:
             # Set the color to the custom color
-            COLOR = custom_color
+            COLOR = path.custom_color
 
         CANVAS.create_line(x1, y1, x2, y2,
                            fill=COLOR,
                            width=5 * CANVAS_SCALE,
-                           tags=("transport_path", station1.stationName, station2.stationName))
+                           tags=("transport_path", station1.stationName, station2.stationName, path.ID))
         # Move the path to the back
         CANVAS.tag_lower("transport_path")
+
+
+def clear_path(path):
+    """
+    Clears the path drawing
+    :return:
+    """
+    global PATHS_DRAWN
+
+    # Delete the path
+    CANVAS.delete(path.ID)
+
+    # Remove the path from the list of drawn paths
+    PATHS_DRAWN.remove(path)
+
+    # Refresh the canvas
+    refresh_canvas()
 
 
 def station_clicked(event):

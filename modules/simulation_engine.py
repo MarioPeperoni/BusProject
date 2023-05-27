@@ -5,6 +5,7 @@ import datetime
 import uuid
 
 from classes.Class_transport_object import TransportObject
+from classes.Class_path import Path
 
 from gui import GUImap_canvas
 
@@ -22,6 +23,7 @@ STOP_WAIT_TIME = 4
 GLOBAL_TIME_SECONDS = datetime.datetime.now().time().hour * 3600 \
                     + datetime.datetime.now().time().minute * 60 \
                     + datetime.datetime.now().time().second
+
 
 GLOBAL_SIMULATION_SPEED = 10
 
@@ -154,6 +156,7 @@ class SimVehicle:
         self.vehicle_speed = update_vehicle_speed()
         self.stops_x = []
         self.stops_y = []
+        self.path = 0
 
     def start_simulating(self, transport_object: TransportObject):
         # Set SIMULATION_RUNNING to true
@@ -171,13 +174,20 @@ class SimVehicle:
             self.stops_x.append(transport_object.stops[i].coordinateX)
             self.stops_y.append(transport_object.stops[i].coordinateY)
 
-        # Move between stops
+        # Create path for vehicle
+        self.path = Path(transport_object.stops, transport_object.transportType)
+        GUImap_canvas.draw_transport_path(self.path)
 
+        # Move between stops
         for i in range(len(self.stops_x) - 1):
             self.move_between(self.stops_x[i], self.stops_y[i], self.stops_x[i + 1], self.stops_y[i + 1])
 
             # Wait at the stop
             wait(STOP_WAIT_TIME)
+
+        # End of simulation - remove vehicle and path from canvas
+        GUImap_canvas.clear_path(self.path)
+        GUImap_canvas.CANVAS.delete(self.ID)
 
     def move_between(self, x1, y1, x2, y2):
         """

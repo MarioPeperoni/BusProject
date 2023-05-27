@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 
+from classes import Class_path
+
 from gui import GUIform_create_transport
 from gui import GUImap_canvas
 
@@ -153,8 +155,11 @@ def transport_highlight_path(event):
 
     selected_transport = get_selected_transport_object()
 
+    # Create path object
+    path = Class_path.Path(selected_transport.stops, TRANSPORT_TYPE_RADIO_SELECTION.get())
+
     # Draw selected transport path
-    GUImap_canvas.draw_transport_path(selected_transport.stops, TRANSPORT_TYPE_RADIO_SELECTION.get())
+    GUImap_canvas.draw_transport_path(path, manual=True)
 
 
 def show_context_menu(event):
