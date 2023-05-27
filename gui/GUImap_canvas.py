@@ -435,16 +435,16 @@ def draw_timer_on_screen(time):
     time_string = "{:02d}:{:02d}:{:02d}".format(hours, minutes, seconds)
 
     # Draw box for the timer
-    CANVAS.create_rectangle(0, 0, int(100 * CANVAS_SCALE), int(50 * CANVAS_SCALE),
+    CANVAS.create_rectangle(0, 0, 100, 50,
                             fill="black",
                             outline="black",
                             tags="sim_timer",
                             stipple="gray50")
 
     # Draw the timer text
-    CANVAS.create_text(int(50 * CANVAS_SCALE), int(25 * CANVAS_SCALE),
+    CANVAS.create_text(50, 25,
                        text=time_string,
-                       font=("Helvetica", 20 * CANVAS_SCALE),
+                       font=("Helvetica", 20),
                        fill=map_color_scheme.get(
                            "colorLightText") if LIGHT_MODE else map_color_scheme.get(
                            "colorDarkText"),
