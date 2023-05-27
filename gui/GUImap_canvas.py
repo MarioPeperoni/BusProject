@@ -1,8 +1,12 @@
 import math
 from tkinter import Canvas
 
+from classes import Class_path
+
 from gui import GUIform_create_station
 from gui import GUIStation_menu
+
+from modules import simulation_engine
 
 from modules.file_handle import map_details
 from modules.file_handle import map_color_scheme
@@ -20,17 +24,12 @@ MOUSE_Y = 0
 STATIONS = file_handle.stations
 
 # Path drawing variables
-PATH_DRAWING = False
-PATH_STATIONS = []
-PATH_TYPE = 0
+PATHS_DRAWN = []
 
 # Simulation variables
+LAST_SIMULATION_TIME = 0
 SIMULATION_RUNNING = False
-VEHICLE_LAST_X = 0
-VEHICLE_LAST_Y = 0
-VEHICLE_LAST_SIZE = 0
-VEHICLE_LAST_TRANSPORT_TYPE = 0
-VEHICLE_LAST_ANGLE = 0
+VEHICLE_ID_LIST = []
 
 
 def create_canvas(tk):
@@ -59,6 +58,9 @@ def create_canvas(tk):
 
     # Draw the stations
     draw_stations(file_handle.stations)
+
+    # Start simulation
+    simulation_engine.start_simulation()
 
     return CANVAS
 
@@ -181,7 +183,11 @@ def refresh_canvas():
     CANVAS.delete("transport_path")
     CANVAS.delete("station_circle")
     CANVAS.delete("station_text")
-    CANVAS.delete("sim_vehicle")
+    CANVAS.delete("sim_timer")
+
+    # Delete sim vehicles
+    for vehicle_id in VEHICLE_ID_LIST:
+        CANVAS.delete(vehicle_id)
 
     # Redraw the map details
     draw_map_details()
@@ -190,11 +196,11 @@ def refresh_canvas():
     draw_stations(STATIONS)
 
     # Redraw paths
-    if PATH_DRAWING:
-        draw_transport_path(PATH_STATIONS, PATH_TYPE)
+    for path in PATHS_DRAWN:
+        draw_transport_path(path)
 
-    if SIMULATION_RUNNING:
-        draw_vehicle(VEHICLE_LAST_X, VEHICLE_LAST_Y, VEHICLE_LAST_SIZE, VEHICLE_LAST_TRANSPORT_TYPE, VEHICLE_LAST_ANGLE)
+    # Draw the timer
+    draw_timer_on_screen(LAST_SIMULATION_TIME)
 
 
 def draw_map_details():
@@ -264,29 +270,30 @@ def draw_stations(stations):
                            tags=("station_text", station.stationName, station.stationID, station.transportType))
 
 
-def draw_transport_path(stations_selected, type, custom_color=None):
+def draw_transport_path(path: Class_path, manual=False):
     """
     Highlights stations and draw the path between them
-    :param stations_selected:
+    :param path: path object
     :return:
     """
-    global PATH_DRAWING
-    global PATH_TYPE
-    global PATH_STATIONS
-    global COLOR
 
-    # Set the path drawing variables
-    PATH_DRAWING = True
-    PATH_TYPE = type
-    PATH_STATIONS = stations_selected
+    # Add the path to the list of drawn paths
+    if path not in PATHS_DRAWN:
+        PATHS_DRAWN.append(path)
+
+    # Check for manual selection
+    if manual:
+        PATHS_DRAWN.clear()
+        PATHS_DRAWN.append(path)
+        CANVAS.delete("transport_path")
 
     # Delete previous path and clear the highlight
-    CANVAS.delete("transport_path")
+    CANVAS.delete(path.ID)
 
     # Draw the path between the stations
-    for i in range(len(stations_selected) - 1):
-        station1 = stations_selected[i]
-        station2 = stations_selected[i + 1]
+    for i in range(len(path.stations) - 1):
+        station1 = path.stations[i]
+        station2 = path.stations[i + 1]
 
         # Get the coordinates of the stations
         x1 = (station1.coordinateX + DRAG_OFFSET[0]) * CANVAS_SCALE
@@ -295,31 +302,48 @@ def draw_transport_path(stations_selected, type, custom_color=None):
         y2 = (station2.coordinateY + DRAG_OFFSET[1]) * CANVAS_SCALE
 
         # Check for custom color
-        if custom_color is None:
+        if path.custom_color is None:
 
             # Set color based on transport type
-            if type == 0:
+            if path.transport_type == 0:
                 COLOR = map_color_scheme.get("colorLightBusStation") \
                     if LIGHT_MODE else map_color_scheme.get("colorDarkBusStation")
-            elif type == 1:
+            elif path.transport_type == 1:
                 COLOR = map_color_scheme.get("colorLightTramStation") \
                     if LIGHT_MODE else map_color_scheme.get("colorDarkTramStation")
-            elif type == 2:
+            elif path.transport_type == 2:
                 COLOR = map_color_scheme.get("colorLightTrainStation") \
                     if LIGHT_MODE else map_color_scheme.get("colorDarkTrainStation")
-            elif type == 3:
+            elif path.transport_type == 3:
                 COLOR = map_color_scheme.get("colorLightMetroStation") \
                     if LIGHT_MODE else map_color_scheme.get("colorDarkMetroStation")
         else:
             # Set the color to the custom color
-            COLOR = custom_color
+            COLOR = path.custom_color
 
         CANVAS.create_line(x1, y1, x2, y2,
                            fill=COLOR,
                            width=5 * CANVAS_SCALE,
-                           tags=("transport_path", station1.stationName, station2.stationName))
+                           tags=("transport_path", station1.stationName, station2.stationName, path.ID))
         # Move the path to the back
         CANVAS.tag_lower("transport_path")
+
+
+def clear_path(path):
+    """
+    Clears the path drawing
+    :return:
+    """
+    global PATHS_DRAWN
+
+    # Delete the path
+    CANVAS.delete(path.ID)
+
+    # Remove the path from the list of drawn paths
+    PATHS_DRAWN.remove(path)
+
+    # Refresh the canvas
+    refresh_canvas()
 
 
 def station_clicked(event):
@@ -341,22 +365,18 @@ def station_clicked(event):
     print(station.stationName, station.stationID, station.transportType)
 
 
-def draw_vehicle(x, y, size, transport_type, angle, custom_color=None):
-    global SIMULATION_RUNNING, \
-        VEHICLE_LAST_X, VEHICLE_LAST_Y, VEHICLE_LAST_SIZE, VEHICLE_LAST_TRANSPORT_TYPE, VEHICLE_LAST_ANGLE
+def draw_vehicle(x, y, size, transport_type, angle, vehicle_id=None, custom_color=None):
+    global SIMULATION_RUNNING
 
     # Set the simulation running variable
     SIMULATION_RUNNING = True
 
     # Delete previous vehicle
-    CANVAS.delete("sim_vehicle")
+    CANVAS.delete(str(vehicle_id))
 
-    # Save the last variables
-    VEHICLE_LAST_X = x
-    VEHICLE_LAST_Y = y
-    VEHICLE_LAST_SIZE = size
-    VEHICLE_LAST_TRANSPORT_TYPE = transport_type
-    VEHICLE_LAST_ANGLE = angle
+    # Add vehicle id to the vehicle list if it is not already there
+    if vehicle_id not in VEHICLE_ID_LIST:
+        VEHICLE_ID_LIST.append(vehicle_id)
 
     # Calculate the size
     size = size * CANVAS_SCALE
@@ -392,8 +412,8 @@ def draw_vehicle(x, y, size, transport_type, angle, custom_color=None):
     vertices = [
         (x - offset, y - offset),
         (x + size - offset, y - offset),
-        (x + size - offset, y + size/2 - offset),
-        (x - offset, y + size/2 - offset)
+        (x + size - offset, y + size / 2 - offset),
+        (x - offset, y + size / 2 - offset)
     ]
 
     # Rotate the polygon vertices
@@ -405,8 +425,47 @@ def draw_vehicle(x, y, size, transport_type, angle, custom_color=None):
         rotated_vertices.append((rotated_x, rotated_y))
 
     CANVAS.create_polygon(*rotated_vertices,
-                            fill=vehicle_color,
-                            width=2 * CANVAS_SCALE, tags="sim_vehicle")
+                          fill=vehicle_color,
+                          width=2 * CANVAS_SCALE, tags=("sim_vehicle", str(vehicle_id)))
 
     # Move the vehicle to the back
-    CANVAS.tag_lower("sim_vehicle")
+    CANVAS.tag_lower(str(vehicle_id))
+
+
+def draw_timer_on_screen(time):
+    """
+    Draws the timer on the screen
+    """
+    global LAST_SIMULATION_TIME
+
+    # Delete previous timer
+    CANVAS.delete("sim_timer")
+
+    LAST_SIMULATION_TIME = time
+
+    # Calculate the time
+    seconds = time % 60
+    minutes = time // 60 % 60
+    hours = time // 3600
+
+    # Format the time
+    time_string = "{:02d}:{:02d}:{:02d}".format(hours, minutes, seconds)
+
+    # Draw box for the timer
+    CANVAS.create_rectangle(0, 0, 100, 50,
+                            fill="black",
+                            outline="black",
+                            tags="sim_timer",
+                            stipple="gray50")
+
+    # Draw the timer text
+    CANVAS.create_text(50, 25,
+                       text=time_string,
+                       font=("Helvetica", 20),
+                       fill=map_color_scheme.get(
+                           "colorLightText") if LIGHT_MODE else map_color_scheme.get(
+                           "colorDarkText"),
+                       tags="sim_timer")
+
+    # Move the timer to the front
+    CANVAS.tag_raise("sim_timer")

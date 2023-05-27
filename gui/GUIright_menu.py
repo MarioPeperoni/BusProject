@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 
+from classes import Class_path
+
 from gui import GUIform_create_transport
 from gui import GUImap_canvas
 
@@ -57,8 +59,7 @@ def create_right_menu(root):
 
     # Create button for starting the simulation
     start_simulation_button = tk.Button(MENU_RIGHT, text="Start simulation",
-                                        command=lambda: simulation_engine.start_simulation(
-                                            get_selected_transport_object()))
+                                        command=lambda: simulation_engine.start_simulation())
     start_simulation_button.pack()
 
     # Create button for stopping the simulation
@@ -115,14 +116,14 @@ def refresh_transport_paths(newTransportObject=None):
         global transport_objects, bus_objects, tram_objects, train_objects, metro_objects
         transport_objects.append(newTransportObject)
 
+        # Sort transport objects by number
+        transport_objects.sort(key=lambda x: x.number)
+
         # Split transport objects into separate lists
         bus_objects = [transport for transport in transport_objects if transport.transportType == 0]
         tram_objects = [transport for transport in transport_objects if transport.transportType == 1]
         train_objects = [transport for transport in transport_objects if transport.transportType == 2]
         metro_objects = [transport for transport in transport_objects if transport.transportType == 3]
-
-    # Sort transport objects by number
-    transport_objects.sort(key=lambda x: x.number)
 
     # Iterate over the transport objects and insert their names into the Listbox
     for transport in transport_objects:
@@ -154,11 +155,11 @@ def transport_highlight_path(event):
 
     selected_transport = get_selected_transport_object()
 
-    # Cancel any running simulation
-    simulation_engine.stop_simulation()
+    # Create path object
+    path = Class_path.Path(selected_transport.stops, TRANSPORT_TYPE_RADIO_SELECTION.get())
 
     # Draw selected transport path
-    GUImap_canvas.draw_transport_path(selected_transport.stops, TRANSPORT_TYPE_RADIO_SELECTION.get())
+    GUImap_canvas.draw_transport_path(path, manual=True)
 
 
 def show_context_menu(event):
