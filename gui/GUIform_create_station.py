@@ -1,8 +1,10 @@
 import tkinter as tk
 import uuid
 
-import file_handle
-import GUImap_canvas
+from modules import file_handle
+
+from gui import GUImap_canvas
+
 from classes.Class_station import Station
 
 

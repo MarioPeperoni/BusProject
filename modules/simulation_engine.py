@@ -3,7 +3,7 @@ import time
 
 from classes.Class_transport_object import TransportObject
 
-import GUImap_canvas
+from gui import GUImap_canvas
 
 SIMULATION_RUNNING = False
 

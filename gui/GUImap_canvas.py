@@ -1,14 +1,13 @@
 import math
 from tkinter import Canvas
 
-import GUIform_create_station
-import GUIStation_menu
+from gui import GUIform_create_station
+from gui import GUIStation_menu
 
-from file_handle import stations
-from file_handle import map_details
-from file_handle import map_color_scheme
+from modules.file_handle import map_details
+from modules.file_handle import map_color_scheme
 
-import file_handle
+from modules import file_handle
 
 # Global variables
 CANVAS = Canvas
@@ -18,6 +17,7 @@ DRAG_OFFSET = [0, 0]
 LIGHT_MODE = False
 MOUSE_X = 0
 MOUSE_Y = 0
+STATIONS = file_handle.stations
 
 # Path drawing variables
 PATH_DRAWING = False
@@ -58,7 +58,7 @@ def create_canvas(tk):
     draw_map_details()
 
     # Draw the stations
-    draw_stations(stations)
+    draw_stations(file_handle.stations)
 
     return CANVAS
 
@@ -153,21 +153,21 @@ def refresh_stations(station, mode="add"):
     :param mode: mode (add)
     :return:
     """
-    global stations
+    global STATIONS
 
     # Mode switch
     if mode == "add":
         # Add the station to the list
-        stations.append(station)
+        STATIONS.append(station)
     elif mode == "remove":
         # Remove the station from the list
         try:
-            stations.remove(station)
+            STATIONS.remove(station)
         except ValueError:
             # If value error try to delete the station by id (it happens if station has been added in this session)
-            for s in stations:
+            for s in STATIONS:
                 if s.stationID == station.stationID:
-                    stations.remove(s)
+                    STATIONS.remove(s)
 
     # Redraw the stations
     refresh_canvas()
@@ -187,7 +187,7 @@ def refresh_canvas():
     draw_map_details()
 
     # Redraw the stations
-    draw_stations(stations)
+    draw_stations(STATIONS)
 
     # Redraw paths
     if PATH_DRAWING:
@@ -221,7 +221,7 @@ def draw_stations(stations):
     CANVAS.delete("station_text")
 
     # Draw the stations
-    for station in stations:
+    for station in STATIONS:
         if station.transportType == 0:
             color = map_color_scheme.get("colorLightBusStation") \
                 if LIGHT_MODE else map_color_scheme.get("colorDarkBusStation")

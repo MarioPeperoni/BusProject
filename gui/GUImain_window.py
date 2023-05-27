@@ -1,7 +1,7 @@
 import tkinter as tk
 
-import GUImap_canvas
-import GUIright_menu
+from gui import GUImap_canvas
+from gui import GUIright_menu
 
 
 def create_main_window():
