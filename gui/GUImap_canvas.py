@@ -25,6 +25,7 @@ PATH_STATIONS = []
 PATH_TYPE = 0
 
 # Simulation variables
+LAST_SIMULATION_TIME = 0
 SIMULATION_RUNNING = False
 VEHICLE_LAST_X = 0
 VEHICLE_LAST_Y = 0
@@ -182,6 +183,7 @@ def refresh_canvas():
     CANVAS.delete("station_circle")
     CANVAS.delete("station_text")
     CANVAS.delete("sim_vehicle")
+    CANVAS.delete("sim_timer")
 
     # Redraw the map details
     draw_map_details()
@@ -193,8 +195,13 @@ def refresh_canvas():
     if PATH_DRAWING:
         draw_transport_path(PATH_STATIONS, PATH_TYPE)
 
+    # Redraw the simulation
     if SIMULATION_RUNNING:
         draw_vehicle(VEHICLE_LAST_X, VEHICLE_LAST_Y, VEHICLE_LAST_SIZE, VEHICLE_LAST_TRANSPORT_TYPE, VEHICLE_LAST_ANGLE)
+
+    # Draw the timer
+    draw_timer_on_screen(LAST_SIMULATION_TIME)
+
 
 
 def draw_map_details():
@@ -392,8 +399,8 @@ def draw_vehicle(x, y, size, transport_type, angle, custom_color=None):
     vertices = [
         (x - offset, y - offset),
         (x + size - offset, y - offset),
-        (x + size - offset, y + size/2 - offset),
-        (x - offset, y + size/2 - offset)
+        (x + size - offset, y + size / 2 - offset),
+        (x - offset, y + size / 2 - offset)
     ]
 
     # Rotate the polygon vertices
@@ -405,8 +412,46 @@ def draw_vehicle(x, y, size, transport_type, angle, custom_color=None):
         rotated_vertices.append((rotated_x, rotated_y))
 
     CANVAS.create_polygon(*rotated_vertices,
-                            fill=vehicle_color,
-                            width=2 * CANVAS_SCALE, tags="sim_vehicle")
+                          fill=vehicle_color,
+                          width=2 * CANVAS_SCALE, tags="sim_vehicle")
 
     # Move the vehicle to the back
     CANVAS.tag_lower("sim_vehicle")
+
+
+def draw_timer_on_screen(time):
+    """
+    Draws the timer on the screen
+    """
+    global LAST_SIMULATION_TIME
+
+    # Delete previous timer
+    CANVAS.delete("sim_timer")
+
+    LAST_SIMULATION_TIME = time
+
+    # Calculate the time
+    seconds = time % 60
+    minutes = time // 60 % 60
+    hours = time // 3600
+
+    # Format the time
+    time_string = "{:02d}:{:02d}:{:02d}".format(hours, minutes, seconds)
+
+    # Draw box for the timer
+    CANVAS.create_rectangle(0, 0, 100 * CANVAS_SCALE, 50 * CANVAS_SCALE,
+                            fill="black",
+                            tags="sim_timer",
+                            stipple="gray50")
+
+    # Draw the timer text
+    CANVAS.create_text(50 * CANVAS_SCALE, 25 * CANVAS_SCALE,
+                       text=time_string,
+                       font=("Helvetica", 20 * CANVAS_SCALE),
+                       fill=map_color_scheme.get(
+                           "colorLightText") if LIGHT_MODE else map_color_scheme.get(
+                           "colorDarkText"),
+                       tags="sim_timer")
+
+    # Move the timer to the front
+    CANVAS.tag_raise("sim_timer")

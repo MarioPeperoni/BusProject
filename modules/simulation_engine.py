@@ -1,5 +1,7 @@
 import math
+import threading
 import time
+import datetime
 
 from classes.Class_transport_object import TransportObject
 
@@ -13,6 +15,11 @@ VEHICLE_SPEED = 50
 NEXT_STOP = 0
 FPS = 60
 STOP_WAIT_TIME = 4
+
+GLOBAL_TIME_SECONDS = datetime.datetime.now().time().hour * 3600 \
+                      + datetime.datetime.now().time().minute * 60 \
+                      + datetime.datetime.now().time().second
+GLOBAL_SIMULATION_SPEED = 10
 
 STOPS_X = []
 STOPS_Y = []
@@ -29,6 +36,9 @@ def start_simulation(transport_object: TransportObject):
     # Set simulation running to true
     SIMULATION_RUNNING = True
 
+    # Start time
+    threading.Thread(target=start_time).start()
+
     # Clear variables
     STOPS_X.clear()
     STOPS_Y.clear()
@@ -37,15 +47,8 @@ def start_simulation(transport_object: TransportObject):
     # Set the transport type
     TRANSPORT_TYPE = transport_object.transportType
 
-    # Determine speed by transport type
-    if TRANSPORT_TYPE == 0:
-        VEHICLE_SPEED = 30
-    elif TRANSPORT_TYPE == 1:
-        VEHICLE_SPEED = 50
-    elif TRANSPORT_TYPE == 2:
-        VEHICLE_SPEED = 70
-    elif TRANSPORT_TYPE == 3:
-        VEHICLE_SPEED = 90
+    # Set the vehicle speed
+    VEHICLE_SPEED = update_vehicle_speed()
 
     # Set next stop to the first stop
     NEXT_STOP = 0
@@ -70,6 +73,40 @@ def start_simulation(transport_object: TransportObject):
 
         # Wait at the stop
         wait(STOP_WAIT_TIME)
+
+
+def update_vehicle_speed():
+    """
+    Updates the vehicle speed
+    """
+    vehicle_speed = 0
+
+    if TRANSPORT_TYPE == 0:
+        vehicle_speed = 3 * GLOBAL_SIMULATION_SPEED
+    elif TRANSPORT_TYPE == 1:
+        vehicle_speed = 5 * GLOBAL_SIMULATION_SPEED
+    elif TRANSPORT_TYPE == 2:
+        vehicle_speed = 70 * GLOBAL_SIMULATION_SPEED
+    elif TRANSPORT_TYPE == 3:
+        vehicle_speed = 90 * GLOBAL_SIMULATION_SPEED
+
+    return vehicle_speed
+
+
+def start_time():
+    """
+    Starts counting the time
+    """
+    # Check if the simulation is running
+    global SIMULATION_RUNNING, GLOBAL_TIME_SECONDS, GLOBAL_SIMULATION_SPEED
+
+    while SIMULATION_RUNNING:
+        # Wait for 1 second
+        wait(1000 / GLOBAL_SIMULATION_SPEED, True)
+        GLOBAL_TIME_SECONDS += 1
+
+        # Update the time
+        GUImap_canvas.draw_timer_on_screen(GLOBAL_TIME_SECONDS)
 
 
 def move_between(x1, y1, x2, y2):
@@ -131,11 +168,16 @@ def move_between(x1, y1, x2, y2):
         time.sleep(1 / FPS)
 
 
-def wait(seconds):
+def wait(seconds, ms=False):
     """
     Waits for given seconds
     """
-    for i in range(seconds * FPS):
+    if ms:
+        frames = int(seconds / (1000 / FPS))
+    else:
+        frames = int(seconds * FPS)
+
+    for i in range(frames):
         GUImap_canvas.CANVAS.update()
         time.sleep(1 / FPS)
 

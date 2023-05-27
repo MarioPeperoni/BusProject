@@ -115,14 +115,14 @@ def refresh_transport_paths(newTransportObject=None):
         global transport_objects, bus_objects, tram_objects, train_objects, metro_objects
         transport_objects.append(newTransportObject)
 
+        # Sort transport objects by number
+        transport_objects.sort(key=lambda x: x.number)
+
         # Split transport objects into separate lists
         bus_objects = [transport for transport in transport_objects if transport.transportType == 0]
         tram_objects = [transport for transport in transport_objects if transport.transportType == 1]
         train_objects = [transport for transport in transport_objects if transport.transportType == 2]
         metro_objects = [transport for transport in transport_objects if transport.transportType == 3]
-
-    # Sort transport objects by number
-    transport_objects.sort(key=lambda x: x.number)
 
     # Iterate over the transport objects and insert their names into the Listbox
     for transport in transport_objects:
