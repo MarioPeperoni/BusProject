@@ -2,12 +2,13 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-import GUIright_menu
-import file_handle
+from gui import GUIright_menu
+from modules import file_handle
 
 from classes.Class_station import Station
 from classes.Class_transport_object import TransportObject
-from file_handle import stations
+
+from modules.file_handle import stations
 
 
 def create_window():

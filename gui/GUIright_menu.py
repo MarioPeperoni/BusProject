@@ -1,21 +1,20 @@
 import tkinter as tk
 from tkinter import messagebox
 
-import GUIform_create_transport
-import GUImap_canvas
-import file_handle
-import simulation_engine
+from gui import GUIform_create_transport
+from gui import GUImap_canvas
 
-from file_handle import transport_objects
-from file_handle import cityName
-
-from file_handle import bus_objects
-from file_handle import tram_objects
-from file_handle import train_objects
-from file_handle import metro_objects
+from modules import file_handle
+from modules import simulation_engine
 
 MENU_RIGHT = tk.Frame
 TRANSPORT_LISTBOX = tk.Listbox
+
+transport_objects = file_handle.transport_objects
+bus_objects = file_handle.bus_objects
+tram_objects = file_handle.tram_objects
+train_objects = file_handle.train_objects
+metro_objects = file_handle.metro_objects
 
 
 def create_right_menu(root):
@@ -31,7 +30,7 @@ def create_right_menu(root):
     MENU_RIGHT.size = "200x600"
 
     # Create label for displaying the city name
-    city_name = tk.Label(MENU_RIGHT, wraplength=200, text=cityName, font=("Arial", 20, "bold"))
+    city_name = tk.Label(MENU_RIGHT, wraplength=200, text=file_handle.cityName, font=("Arial", 20, "bold"))
     city_name.pack()
 
     # Create button in right frame for creating a new transport entry

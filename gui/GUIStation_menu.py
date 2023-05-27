@@ -1,7 +1,8 @@
 import tkinter as tk
 
-import GUImap_canvas
-import file_handle
+from gui import GUImap_canvas
+
+from modules import file_handle
 
 from tkinter import messagebox
 

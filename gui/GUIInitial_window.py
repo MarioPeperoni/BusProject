@@ -1,8 +1,7 @@
 import json
 import tkinter as tk
 
-import file_handle
-import openMapsImporter
+from modules import file_handle, openMapsImporter
 
 WINDOW = tk.Tk()
 
@@ -195,5 +194,5 @@ def load_main_program():
     # Close init window
     WINDOW.withdraw()
     # Start main program
-    import GUImain_window
+    from gui import GUImain_window
     GUImain_window.create_main_window()
