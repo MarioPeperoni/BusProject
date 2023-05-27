@@ -57,8 +57,7 @@ def create_right_menu(root):
 
     # Create button for starting the simulation
     start_simulation_button = tk.Button(MENU_RIGHT, text="Start simulation",
-                                        command=lambda: simulation_engine.start_simulation(
-                                            get_selected_transport_object()))
+                                        command=lambda: simulation_engine.start_simulation())
     start_simulation_button.pack()
 
     # Create button for stopping the simulation
@@ -153,9 +152,6 @@ def transport_highlight_path(event):
     """
 
     selected_transport = get_selected_transport_object()
-
-    # Cancel any running simulation
-    simulation_engine.stop_simulation()
 
     # Draw selected transport path
     GUImap_canvas.draw_transport_path(selected_transport.stops, TRANSPORT_TYPE_RADIO_SELECTION.get())

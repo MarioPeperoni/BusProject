@@ -4,6 +4,8 @@ from tkinter import Canvas
 from gui import GUIform_create_station
 from gui import GUIStation_menu
 
+from modules import simulation_engine
+
 from modules.file_handle import map_details
 from modules.file_handle import map_color_scheme
 
@@ -27,11 +29,7 @@ PATH_TYPE = 0
 # Simulation variables
 LAST_SIMULATION_TIME = 0
 SIMULATION_RUNNING = False
-VEHICLE_LAST_X = 0
-VEHICLE_LAST_Y = 0
-VEHICLE_LAST_SIZE = 0
-VEHICLE_LAST_TRANSPORT_TYPE = 0
-VEHICLE_LAST_ANGLE = 0
+VEHICLE_ID_LIST = []
 
 
 def create_canvas(tk):
@@ -60,6 +58,9 @@ def create_canvas(tk):
 
     # Draw the stations
     draw_stations(file_handle.stations)
+
+    # Start simulation
+    simulation_engine.start_simulation()
 
     return CANVAS
 
@@ -182,8 +183,11 @@ def refresh_canvas():
     CANVAS.delete("transport_path")
     CANVAS.delete("station_circle")
     CANVAS.delete("station_text")
-    CANVAS.delete("sim_vehicle")
     CANVAS.delete("sim_timer")
+
+    # Delete sim vehicles
+    for vehicle_id in VEHICLE_ID_LIST:
+        CANVAS.delete(vehicle_id)
 
     # Redraw the map details
     draw_map_details()
@@ -194,10 +198,6 @@ def refresh_canvas():
     # Redraw paths
     if PATH_DRAWING:
         draw_transport_path(PATH_STATIONS, PATH_TYPE)
-
-    # Redraw the simulation
-    if SIMULATION_RUNNING:
-        draw_vehicle(VEHICLE_LAST_X, VEHICLE_LAST_Y, VEHICLE_LAST_SIZE, VEHICLE_LAST_TRANSPORT_TYPE, VEHICLE_LAST_ANGLE)
 
     # Draw the timer
     draw_timer_on_screen(LAST_SIMULATION_TIME)
@@ -348,22 +348,18 @@ def station_clicked(event):
     print(station.stationName, station.stationID, station.transportType)
 
 
-def draw_vehicle(x, y, size, transport_type, angle, custom_color=None):
-    global SIMULATION_RUNNING, \
-        VEHICLE_LAST_X, VEHICLE_LAST_Y, VEHICLE_LAST_SIZE, VEHICLE_LAST_TRANSPORT_TYPE, VEHICLE_LAST_ANGLE
+def draw_vehicle(x, y, size, transport_type, angle, vehicle_id=None, custom_color=None):
+    global SIMULATION_RUNNING
 
     # Set the simulation running variable
     SIMULATION_RUNNING = True
 
     # Delete previous vehicle
-    CANVAS.delete("sim_vehicle")
+    CANVAS.delete(str(vehicle_id))
 
-    # Save the last variables
-    VEHICLE_LAST_X = x
-    VEHICLE_LAST_Y = y
-    VEHICLE_LAST_SIZE = size
-    VEHICLE_LAST_TRANSPORT_TYPE = transport_type
-    VEHICLE_LAST_ANGLE = angle
+    # Add vehicle id to the vehicle list if it is not already there
+    if vehicle_id not in VEHICLE_ID_LIST:
+        VEHICLE_ID_LIST.append(vehicle_id)
 
     # Calculate the size
     size = size * CANVAS_SCALE
@@ -413,10 +409,10 @@ def draw_vehicle(x, y, size, transport_type, angle, custom_color=None):
 
     CANVAS.create_polygon(*rotated_vertices,
                           fill=vehicle_color,
-                          width=2 * CANVAS_SCALE, tags="sim_vehicle")
+                          width=2 * CANVAS_SCALE, tags=("sim_vehicle", str(vehicle_id)))
 
     # Move the vehicle to the back
-    CANVAS.tag_lower("sim_vehicle")
+    CANVAS.tag_lower(str(vehicle_id))
 
 
 def draw_timer_on_screen(time):
@@ -439,13 +435,14 @@ def draw_timer_on_screen(time):
     time_string = "{:02d}:{:02d}:{:02d}".format(hours, minutes, seconds)
 
     # Draw box for the timer
-    CANVAS.create_rectangle(0, 0, 100 * CANVAS_SCALE, 50 * CANVAS_SCALE,
+    CANVAS.create_rectangle(0, 0, int(100 * CANVAS_SCALE), int(50 * CANVAS_SCALE),
                             fill="black",
+                            outline="black",
                             tags="sim_timer",
                             stipple="gray50")
 
     # Draw the timer text
-    CANVAS.create_text(50 * CANVAS_SCALE, 25 * CANVAS_SCALE,
+    CANVAS.create_text(int(50 * CANVAS_SCALE), int(25 * CANVAS_SCALE),
                        text=time_string,
                        font=("Helvetica", 20 * CANVAS_SCALE),
                        fill=map_color_scheme.get(

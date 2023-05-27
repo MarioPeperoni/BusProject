@@ -2,10 +2,13 @@ import math
 import threading
 import time
 import datetime
+import uuid
 
 from classes.Class_transport_object import TransportObject
 
 from gui import GUImap_canvas
+
+from modules import file_handle
 
 SIMULATION_RUNNING = False
 
@@ -17,21 +20,25 @@ FPS = 60
 STOP_WAIT_TIME = 4
 
 GLOBAL_TIME_SECONDS = datetime.datetime.now().time().hour * 3600 \
-                      + datetime.datetime.now().time().minute * 60 \
-                      + datetime.datetime.now().time().second
+                    + datetime.datetime.now().time().minute * 60 \
+                    + datetime.datetime.now().time().second
+
 GLOBAL_SIMULATION_SPEED = 10
 
 STOPS_X = []
 STOPS_Y = []
 
 
-def start_simulation(transport_object: TransportObject):
+def start_simulation():
     """
     Starts the simulation
-    :param transport_object:
     :return:
     """
     global VEHICLE_COLOR, VEHICLE_SPEED, NEXT_STOP, TRANSPORT_TYPE, SIMULATION_RUNNING
+
+    # Check if the simulation is already running
+    if SIMULATION_RUNNING is True:
+        return
 
     # Set simulation running to true
     SIMULATION_RUNNING = True
@@ -39,40 +46,29 @@ def start_simulation(transport_object: TransportObject):
     # Start time
     threading.Thread(target=start_time).start()
 
-    # Clear variables
-    STOPS_X.clear()
-    STOPS_Y.clear()
-    NEXT_STOP = 0
 
-    # Set the transport type
-    TRANSPORT_TYPE = transport_object.transportType
+def create_new_vehicle_simulation(transport_object: TransportObject):
+    """
+    Creates new vehicle simulation
+    """
+    sim_vehicle = SimVehicle()
+    print("Starting simulation... Transport number: " + str(transport_object.number))
 
-    # Set the vehicle speed
-    VEHICLE_SPEED = update_vehicle_speed()
+    # Start simulation
+    threading.Thread(sim_vehicle.start_simulating(transport_object)).start()
 
-    # Set next stop to the first stop
-    NEXT_STOP = 0
 
-    # Read all coordinates of the stops
-    for i in range(len(transport_object.stops)):
-        STOPS_X.append(transport_object.stops[i].coordinateX)
-        STOPS_Y.append(transport_object.stops[i].coordinateY)
-
-    # Calculate the distance between stops
-    distance_between_stops = []
-    for i in range(len(STOPS_X) - 1):
-        distance_between_stops.append((STOPS_X[i + 1] - STOPS_X[i]) ** 2 + (STOPS_Y[i + 1] - STOPS_Y[i]) ** 2)
-
-    # Draw the vehicle
-    print(distance_between_stops)
-
-    # Move between stops
-    for i in range(len(STOPS_X) - 1):
-        print("Moving between stops", i, "and", i + 1)
-        move_between(STOPS_X[i], STOPS_Y[i], STOPS_X[i + 1], STOPS_Y[i + 1])
-
-        # Wait at the stop
-        wait(STOP_WAIT_TIME)
+def time_listener():
+    """
+    Listens for time and looks for time in transport objects timetable
+    """
+    if SIMULATION_RUNNING is False:
+        return
+    for transport_object in file_handle.transport_objects:
+        # Check if the transport object has a time in table
+        if GLOBAL_TIME_SECONDS in transport_object.departureTimes:
+            # Create thread for simulation
+            threading.Thread(target=create_new_vehicle_simulation, args=(transport_object,)).start()
 
 
 def update_vehicle_speed():
@@ -103,69 +99,22 @@ def start_time():
     while SIMULATION_RUNNING:
         # Wait for 1 second
         wait(1000 / GLOBAL_SIMULATION_SPEED, True)
-        GLOBAL_TIME_SECONDS += 1
+
+        # Check if time is past 24 hours
+        if GLOBAL_TIME_SECONDS >= 86400:
+            # Reset the time
+            GLOBAL_TIME_SECONDS = 0
+        else:
+            # Increment the time
+            GLOBAL_TIME_SECONDS += 1
+
+        # Check if minute passed
+        if GLOBAL_TIME_SECONDS % 60 == 0:
+            # Update the time
+            time_listener()
 
         # Update the time
         GUImap_canvas.draw_timer_on_screen(GLOBAL_TIME_SECONDS)
-
-
-def move_between(x1, y1, x2, y2):
-    """
-    Moves the vehicle between two points
-    :param x1: x coordinate of the first point
-    :param y1: y coordinate of the first point
-    :param x2: x coordinate of the second point
-    :param y2: y coordinate of the second point
-    """
-
-    # Check if the simulation is running
-    global SIMULATION_RUNNING
-    if not SIMULATION_RUNNING:
-        return
-
-    # Calculate the distance between the two points
-    distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
-
-    # Calculate the time it takes to move between the two points
-    time_to_move = distance / VEHICLE_SPEED
-
-    # Calculate the distance to move in each frame
-    distance_to_move = distance / (time_to_move * FPS)
-
-    # Calculate the angle between the two points
-    angle = math.atan2(y2 - y1, x2 - x1)
-
-    # Calculate the distance to move in each frame
-    distance_to_move_x = distance_to_move * math.cos(angle)
-    distance_to_move_y = distance_to_move * math.sin(angle)
-
-    time_stamp = 0
-    # Move the vehicle
-    for i in range(int(time_to_move * FPS)):
-
-        # Check if the simulation is running
-        if not SIMULATION_RUNNING:
-            return
-
-        # Print the time stamp, distance to move and angle
-        print("Time Stamp:", time_stamp, "Distance to Move (X):", distance_to_move_x, "Distance to Move (Y):",
-              distance_to_move_y, "Angle:", angle)
-
-        # Update the time stamp
-        time_stamp += 1
-
-        # Draw the vehicle
-        GUImap_canvas.draw_vehicle(x1 + distance_to_move_x, y1 + distance_to_move_y, 25, TRANSPORT_TYPE, angle)
-
-        # Update the coordinates
-        x1 += distance_to_move_x
-        y1 += distance_to_move_y
-
-        # Update the canvas
-        GUImap_canvas.CANVAS.update()
-
-        # Wait for 1/FPS seconds
-        time.sleep(1 / FPS)
 
 
 def wait(seconds, ms=False):
@@ -188,7 +137,99 @@ def stop_simulation():
     """
     global SIMULATION_RUNNING
 
+    # Check if the simulation is already stopped
+    if SIMULATION_RUNNING is False:
+        return
+
     # Set simulation running to false
     SIMULATION_RUNNING = False
     GUImap_canvas.SIMULATION_RUNNING = False
     GUImap_canvas.refresh_canvas()
+
+
+class SimVehicle:
+    def __init__(self):
+        self.ID = 0
+        self.transport_type = 0
+        self.vehicle_speed = update_vehicle_speed()
+        self.stops_x = []
+        self.stops_y = []
+
+    def start_simulating(self, transport_object: TransportObject):
+        # Set SIMULATION_RUNNING to true
+        global SIMULATION_RUNNING
+        SIMULATION_RUNNING = True
+
+        # Set the vehicle ID
+        self.ID = uuid.uuid4()
+
+        # Set the transport type
+        self.transport_type = transport_object.transportType
+
+        # Read all coordinates of the stops
+        for i in range(len(transport_object.stops)):
+            self.stops_x.append(transport_object.stops[i].coordinateX)
+            self.stops_y.append(transport_object.stops[i].coordinateY)
+
+        # Move between stops
+
+        for i in range(len(self.stops_x) - 1):
+            self.move_between(self.stops_x[i], self.stops_y[i], self.stops_x[i + 1], self.stops_y[i + 1])
+
+            # Wait at the stop
+            wait(STOP_WAIT_TIME)
+
+    def move_between(self, x1, y1, x2, y2):
+        """
+        Moves the vehicle between two points
+        :return:
+        """
+        global SIMULATION_RUNNING
+        if not SIMULATION_RUNNING:
+            return
+
+        # Calculate the distance between the two points
+        distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+
+        # Calculate the time it takes to move between the two points
+        time_to_move = distance / self.vehicle_speed
+
+        # Calculate the distance to move in each frame
+        distance_to_move = distance / (time_to_move * FPS)
+
+        # Calculate the angle between the two points
+        angle = math.atan2(y2 - y1, x2 - x1)
+
+        # Calculate the distance to move in each frame
+        distance_to_move_x = distance_to_move * math.cos(angle)
+        distance_to_move_y = distance_to_move * math.sin(angle)
+
+        time_stamp = 0
+
+        # Move the vehicle
+        for i in range(int(time_to_move * FPS)):
+
+            # Check if the simulation is running
+            if not SIMULATION_RUNNING:
+                return
+
+            # Update the time stamp
+            time_stamp += 1
+
+            # Draw the vehicle
+            GUImap_canvas.draw_vehicle(x1 + distance_to_move_x,
+                                       y1 + distance_to_move_y,
+                                       25,
+                                       self.transport_type,
+                                       angle,
+                                       self.ID)
+
+            # Update the coordinates
+            x1 += distance_to_move_x
+            y1 += distance_to_move_y
+
+            # Update the canvas
+            GUImap_canvas.CANVAS.update()
+
+            # Wait for 1/FPS seconds
+            time.sleep(1 / FPS)
