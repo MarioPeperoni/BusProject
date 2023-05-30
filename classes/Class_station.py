@@ -15,17 +15,18 @@ class Station:
     coordinateY = 0
 
     @classmethod
-    def get_stations_by_names(cls, names, stations_list):
+    def get_stations_by_names(cls, names, stations_list, transport_type):
         """
         Converts a list of station names to a list of Station objects
         :param names: list of names of stations to search for
         :param stations_list: list of Station objects to search through
+        :param transport_type: type of transport (0 - bus, 1 - tram, 2 - train, 3 - metro)
         :return: list of Station objects if found, None otherwise
         """
         stations = []
         for name in names:
             for station in stations_list:
-                if station.stationName == name:
+                if station.stationName == name and station.transportType == transport_type:
                     stations.append(station)
                     break
         if len(stations) > 0:

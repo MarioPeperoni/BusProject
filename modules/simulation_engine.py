@@ -18,12 +18,11 @@ TRANSPORT_TYPE = 0
 VEHICLE_SPEED = 50
 NEXT_STOP = 0
 FPS = 60
-STOP_WAIT_TIME = 4
+STOP_WAIT_TIME = 20000  # 20 seconds for timescale 1
 
 GLOBAL_TIME_SECONDS = datetime.datetime.now().time().hour * 3600 \
-                    + datetime.datetime.now().time().minute * 60 \
-                    + datetime.datetime.now().time().second
-
+                      + datetime.datetime.now().time().minute * 60 \
+                      + datetime.datetime.now().time().second
 
 GLOBAL_SIMULATION_SPEED = 10
 
@@ -182,8 +181,8 @@ class SimVehicle:
         for i in range(len(self.stops_x) - 1):
             self.move_between(self.stops_x[i], self.stops_y[i], self.stops_x[i + 1], self.stops_y[i + 1])
 
-            # Wait at the stop
-            wait(STOP_WAIT_TIME)
+            # Wait at the stop for given ms time
+            wait(STOP_WAIT_TIME / GLOBAL_SIMULATION_SPEED, True)
 
         # End of simulation - remove vehicle and path from canvas
         GUImap_canvas.clear_path(self.path)

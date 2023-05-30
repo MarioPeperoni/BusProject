@@ -46,7 +46,7 @@ def create_canvas(tk):
     CANVAS.bind("<MouseWheel>", zoom)
     CANVAS.bind("<ButtonPress-1>", start_drag)
     CANVAS.bind("<B1-Motion>", drag)
-    CANVAS.bind("<Button-2>", lambda event: GUIform_create_station.create_window(MOUSE_X, MOUSE_Y))
+    CANVAS.bind("<Button-2>", lambda event: GUIform_create_station.create_window(round(MOUSE_X), round(MOUSE_Y)))
     CANVAS.bind("<Motion>", get_mouse_coordinates)
     CANVAS.tag_bind("station_circle", "<Button-1>", station_clicked)
 

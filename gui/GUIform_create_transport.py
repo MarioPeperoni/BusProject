@@ -289,7 +289,7 @@ def submit_form():
         return
 
     # Convert stops names to station objects
-    stops = Station.get_stations_by_names(STOPS_ADDED, stations)
+    stops = Station.get_stations_by_names(STOPS_ADDED, stations, TRANSPORT_TYPE.get())
 
     # Convert times to seconds
     for i in range(len(DEPARTURE_TIMES)):
