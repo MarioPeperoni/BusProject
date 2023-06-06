@@ -35,13 +35,15 @@ def import_area_big(left, bottom, right, top, map_size=2000):
     :return:
     """
     # Calculate the number of chunks
-    chunks_x = int((right - left) / 0.0001)
-    chunks_y = int((top - bottom) / 0.0001)
+    chunks_x = int((right - left) / 0.01)
+    chunks_y = int((top - bottom) / 0.01)
 
     # Import the chunks
-    for x in range(chunks_x):
+    for x in range(chunks_x, 0, -1):
         for y in range(chunks_y):
-            import_area(left + x * 0.01, bottom + y * 0.01, left + (x + 1) * 0.01, bottom + (y + 1) * 0.01, map_size)
+            print(f'Importing chunk {x}x{y}y')
+            import_area(left=left + x * 0.01, bottom=bottom + y * 0.01, right=left + (x + 1) * 0.01,
+                        top=bottom + (y + 1) * 0.01, map_size=map_size, offset_x=-(x * map_size), offset_y=y * map_size)
 
 
 def import_area(left, bottom, right, top, map_size=2000, offset_x=0, offset_y=0):
