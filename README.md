@@ -1,4 +1,4 @@
-<img src="data/icon/icon.png" height=20% align="right" style="margin: 10px">
+<img src="data/icon/icon.png" align="right" style="margin: 10px; width: 20%">
 
 # Welcome to bus project! 🚌
 
@@ -26,6 +26,9 @@ The simulation offers the flexibility to set the time of day or adjust the simul
 ## User-Friendly GUI
 
 The user interface is incredibly user-friendly. With just a simple right-click on the map, you gain the ability to effortlessly incorporate new stations and transport paths into your public transport system.
+
+<img src=".github/readmeimages/station_add.gif">
+
 
 ---
 
