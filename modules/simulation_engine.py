@@ -24,6 +24,8 @@ GLOBAL_TIME_SECONDS = datetime.datetime.now().time().hour * 3600 \
                       + datetime.datetime.now().time().minute * 60 \
                       + datetime.datetime.now().time().second
 
+GLOBAL_TIME_SECONDS = 43170
+
 GLOBAL_SIMULATION_SPEED = 10
 
 STOPS_X = []
