@@ -222,6 +222,9 @@ def create_empty_city(name, map_color_scheme=map_color.MapColorSchemeDefault):
             data = json.load(file)
     except FileNotFoundError:
         data = []
+        # Create the file if it doesn't exist
+        with open("data/city_load_data.json", "w") as file:
+            json.dump(data, file, indent=4)
     file.close()
 
     # Add the new city load data to the list

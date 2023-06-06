@@ -49,8 +49,14 @@ def load_cities_data():
     :return:
     """
     # Get all the cities from the json file
-    with open("data/city_load_data.json", "r") as file:
-        data = json.load(file)
+    try:
+        with open("data/city_load_data.json", "r") as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        data = []
+        # Create the file if it doesn't exist
+        with open("data/city_load_data.json", "w") as file:
+            json.dump(data, file, indent=4)
     file.close()
 
     # Append cities name to the listbox

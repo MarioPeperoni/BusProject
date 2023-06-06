@@ -23,7 +23,7 @@ def create_new_map_window():
                           command=lambda: ok_button_clicked())
     ok_button.grid(row=1, column=0, columnspan=2, pady=5)
 
-    def ok_button_clicked(self):
+    def ok_button_clicked():
         # Create empty city
         file_handle.create_empty_city(map_name_entry.get())
 
