@@ -17,16 +17,15 @@ TRANSPORT_TYPE = 0
 
 VEHICLE_SPEED = 50
 NEXT_STOP = 0
-FPS = 60
+FPS = 1000
 STOP_WAIT_TIME = 20000  # 20 seconds for timescale 1
 
 GLOBAL_TIME_SECONDS = datetime.datetime.now().time().hour * 3600 \
                       + datetime.datetime.now().time().minute * 60 \
                       + datetime.datetime.now().time().second
 
-GLOBAL_TIME_SECONDS = 43170
-
 GLOBAL_SIMULATION_SPEED = 10
+LAST_SIMULATION_SPEED = 10
 
 STOPS_X = []
 STOPS_Y = []
@@ -148,6 +147,51 @@ def stop_simulation():
     SIMULATION_RUNNING = False
     GUImap_canvas.SIMULATION_RUNNING = False
     GUImap_canvas.refresh_canvas()
+
+
+def change_sim_speed(mode):
+    """
+    Changes the simulation speed
+    :param mode: 0 - decrease, 1 - increase, 2 - full stop, 3 - resume, 4 - multiply by 2, 5 - divide by 2
+    :return:
+    """
+    global GLOBAL_SIMULATION_SPEED
+    global LAST_SIMULATION_SPEED
+    global SIMULATION_RUNNING
+    global FPS
+
+    if mode == 'decrease':
+        if GLOBAL_SIMULATION_SPEED > 0:
+            if GLOBAL_SIMULATION_SPEED == 10:
+                GLOBAL_SIMULATION_SPEED = 1
+            elif GLOBAL_SIMULATION_SPEED != 1:
+                GLOBAL_SIMULATION_SPEED -= 10
+
+    elif mode == 'increase':
+        if 1000 > GLOBAL_SIMULATION_SPEED > 0:
+            if GLOBAL_SIMULATION_SPEED == 1:
+                GLOBAL_SIMULATION_SPEED = 10
+            else:
+                GLOBAL_SIMULATION_SPEED += 10
+
+    elif mode == 'multiply':
+        if GLOBAL_SIMULATION_SPEED < 1000:
+            GLOBAL_SIMULATION_SPEED *= 2
+
+    elif mode == 'divide':
+        if GLOBAL_SIMULATION_SPEED > 0 and GLOBAL_SIMULATION_SPEED == 0:
+            GLOBAL_SIMULATION_SPEED /= 2
+
+    elif mode == 'play/pause':
+        if GLOBAL_SIMULATION_SPEED == 0:
+            GLOBAL_SIMULATION_SPEED = LAST_SIMULATION_SPEED
+            SIMULATION_RUNNING = True
+            start_time()
+        else:
+            LAST_SIMULATION_SPEED = GLOBAL_SIMULATION_SPEED
+            GLOBAL_SIMULATION_SPEED = 0
+            SIMULATION_RUNNING = False
+    return GLOBAL_SIMULATION_SPEED
 
 
 class SimVehicle:
