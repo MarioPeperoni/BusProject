@@ -57,20 +57,57 @@ def create_right_menu(root):
                                          value=3, command=refresh_transport_paths)
     transportType_metro.pack()
 
-    # Create button for starting the simulation
-    start_simulation_button = tk.Button(MENU_RIGHT, text="Start simulation",
-                                        command=lambda: simulation_engine.start_simulation())
-    start_simulation_button.pack()
-
-    # Create button for stopping the simulation
-    stop_simulation_button = tk.Button(MENU_RIGHT, text="Stop simulation",
-                                       command=lambda: simulation_engine.stop_simulation())
-    stop_simulation_button.pack()
+    # Create controls for simulation
+    create_simulation_controls().pack()
 
     # Create listbox for displaying all connections
     create_listbox(MENU_RIGHT).pack(pady=10, side=tk.TOP, fill=tk.BOTH, expand=True)
 
     return MENU_RIGHT
+
+
+def create_simulation_controls():
+    """
+    Creates view for simulation controls
+    :return:
+    """
+    simulation_frame = tk.Frame(MENU_RIGHT)
+
+    simulation_frame_buttons = tk.Frame(simulation_frame)
+
+    # Create variable for storing the simulation speed
+    simulation_speed = tk.IntVar()
+    simulation_speed.set(simulation_engine.GLOBAL_SIMULATION_SPEED)
+
+    # Create button for decreasing the simulation speed
+    simulation_speed_decrease = tk.Button(simulation_frame_buttons, text="⏪",
+                                          command=lambda:
+                                          update_label(simulation_engine.change_sim_speed('decrease')))
+    simulation_speed_decrease.grid(row=0, column=0)
+
+    # Create button for increasing the simulation speed
+    simulation_speed_increase = tk.Button(simulation_frame_buttons, text="⏩",
+                                          command=lambda:
+                                          update_label(simulation_engine.change_sim_speed('increase')))
+    simulation_speed_increase.grid(row=0, column=2)
+
+    # Create button for starting/resuming the simulation
+    simulation_start = tk.Button(simulation_frame_buttons, text="⏯️",
+                                 command=lambda:
+                                 update_label(simulation_engine.change_sim_speed('play/pause')))
+    simulation_start.grid(row=0, column=1)
+
+    simulation_frame_buttons.pack()
+
+    # Create label for displaying the simulation speed
+    simulation_speed_label = tk.Label(simulation_frame, text='Speed: ' + str(simulation_speed.get()) + 'x')
+    simulation_speed_label.pack()
+
+    def update_label(speed):
+        simulation_speed.set(speed)
+        simulation_speed_label.config(text='Speed: ' + str(simulation_speed.get()) + 'x')
+
+    return simulation_frame
 
 
 def create_listbox(root):

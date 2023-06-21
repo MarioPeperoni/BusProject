@@ -11,6 +11,8 @@ from modules import simulation_engine
 from modules.file_handle import map_details
 from modules.file_handle import map_color_scheme
 
+from gui import GUIform_set_time
+
 from modules import file_handle
 
 # Global variables
@@ -49,6 +51,7 @@ def create_canvas(tk):
     CANVAS.bind("<Button-2>", lambda event: GUIform_create_station.create_window(round(MOUSE_X), round(MOUSE_Y)))
     CANVAS.bind("<Motion>", get_mouse_coordinates)
     CANVAS.tag_bind("station_circle", "<Button-1>", station_clicked)
+    CANVAS.tag_bind("sim_timer", "<Button-1>", lambda event: GUIform_set_time.create())
 
     # Set the background color
     CANVAS.configure(bg=map_color_scheme.get("colorLightBG") if LIGHT_MODE else map_color_scheme.get("colorDarkBG"))
