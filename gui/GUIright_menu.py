@@ -73,31 +73,35 @@ def create_simulation_controls():
     """
     simulation_frame = tk.Frame(MENU_RIGHT)
 
+    simulation_frame_buttons = tk.Frame(simulation_frame)
+
     # Create variable for storing the simulation speed
     simulation_speed = tk.IntVar()
     simulation_speed.set(simulation_engine.GLOBAL_SIMULATION_SPEED)
 
-    # Create label for displaying the simulation speed
-    simulation_speed_label = tk.Label(simulation_frame, text='Speed: ' + str(simulation_speed.get()) + 'x')
-    simulation_speed_label.grid(row=1, column=1)
-
     # Create button for decreasing the simulation speed
-    simulation_speed_decrease = tk.Button(simulation_frame, text="⏪",
+    simulation_speed_decrease = tk.Button(simulation_frame_buttons, text="⏪",
                                           command=lambda:
                                           update_label(simulation_engine.change_sim_speed('decrease')))
     simulation_speed_decrease.grid(row=0, column=0)
 
     # Create button for increasing the simulation speed
-    simulation_speed_increase = tk.Button(simulation_frame, text="⏩",
+    simulation_speed_increase = tk.Button(simulation_frame_buttons, text="⏩",
                                           command=lambda:
                                           update_label(simulation_engine.change_sim_speed('increase')))
     simulation_speed_increase.grid(row=0, column=2)
 
     # Create button for starting/resuming the simulation
-    simulation_start = tk.Button(simulation_frame, text="⏯️",
+    simulation_start = tk.Button(simulation_frame_buttons, text="⏯️",
                                  command=lambda:
                                  update_label(simulation_engine.change_sim_speed('play/pause')))
     simulation_start.grid(row=0, column=1)
+
+    simulation_frame_buttons.pack()
+
+    # Create label for displaying the simulation speed
+    simulation_speed_label = tk.Label(simulation_frame, text='Speed: ' + str(simulation_speed.get()) + 'x')
+    simulation_speed_label.pack()
 
     def update_label(speed):
         simulation_speed.set(speed)

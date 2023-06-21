@@ -24,8 +24,8 @@ GLOBAL_TIME_SECONDS = datetime.datetime.now().time().hour * 3600 \
                       + datetime.datetime.now().time().minute * 60 \
                       + datetime.datetime.now().time().second
 
-GLOBAL_SIMULATION_SPEED = 10
-LAST_SIMULATION_SPEED = 10
+GLOBAL_SIMULATION_SPEED = 1
+LAST_SIMULATION_SPEED = 1
 
 STOPS_X = []
 STOPS_Y = []
@@ -152,13 +152,11 @@ def stop_simulation():
 def change_sim_speed(mode):
     """
     Changes the simulation speed
-    :param mode: 0 - decrease, 1 - increase, 2 - full stop, 3 - resume, 4 - multiply by 2, 5 - divide by 2
     :return:
     """
     global GLOBAL_SIMULATION_SPEED
     global LAST_SIMULATION_SPEED
     global SIMULATION_RUNNING
-    global FPS
 
     if mode == 'decrease':
         if GLOBAL_SIMULATION_SPEED > 0:
@@ -174,24 +172,32 @@ def change_sim_speed(mode):
             else:
                 GLOBAL_SIMULATION_SPEED += 10
 
-    elif mode == 'multiply':
-        if GLOBAL_SIMULATION_SPEED < 1000:
-            GLOBAL_SIMULATION_SPEED *= 2
-
-    elif mode == 'divide':
-        if GLOBAL_SIMULATION_SPEED > 0 and GLOBAL_SIMULATION_SPEED == 0:
-            GLOBAL_SIMULATION_SPEED /= 2
-
     elif mode == 'play/pause':
         if GLOBAL_SIMULATION_SPEED == 0:
             GLOBAL_SIMULATION_SPEED = LAST_SIMULATION_SPEED
             SIMULATION_RUNNING = True
-            start_time()
+            threading.Thread(target=start_time).start()
         else:
             LAST_SIMULATION_SPEED = GLOBAL_SIMULATION_SPEED
             GLOBAL_SIMULATION_SPEED = 0
             SIMULATION_RUNNING = False
+
     return GLOBAL_SIMULATION_SPEED
+
+
+def set_time(time_to_set):
+    """
+    Sets the time to time provided
+    :param time_to_set: time in string format HH:MM
+    :return:
+    """
+    global GLOBAL_TIME_SECONDS
+
+    # Split the time
+    time_split = time_to_set.split(':')
+
+    # Set the time
+    GLOBAL_TIME_SECONDS = int(time_split[0]) * 3600 + int(time_split[1]) * 60
 
 
 class SimVehicle:
@@ -228,7 +234,8 @@ class SimVehicle:
             self.move_between(self.stops_x[i], self.stops_y[i], self.stops_x[i + 1], self.stops_y[i + 1])
 
             # Wait at the stop for given ms time
-            wait(STOP_WAIT_TIME / GLOBAL_SIMULATION_SPEED, True)
+            if SIMULATION_RUNNING:
+                wait(STOP_WAIT_TIME / GLOBAL_SIMULATION_SPEED, True)
 
         # End of simulation - remove vehicle and path from canvas
         GUImap_canvas.clear_path(self.path)
